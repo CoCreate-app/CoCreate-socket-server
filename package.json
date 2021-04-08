@@ -20,7 +20,14 @@
     "html5-framework",
     "javascript-framework"
   ],
+    "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
+  "scripts": {
+    "demo": "PORT=5000 node demo/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CoCreate-app/CoCreate-socket-server.git"
@@ -31,10 +38,6 @@
     "url": "https://github.com/CoCreate-app/CoCreate-socket-server/issues"
   },
   "homepage": "https://cocreate.app/docs/CoCreate-socket-server",
-  "scripts": {
-    "demo": "PORT=5000 node demo/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "dependencies": {
     "@cocreate/docs": "^1.0.3",
     "querystring": "^0.2.0",
@@ -42,5 +45,6 @@
   },
   "devDependencies": {
     "express": "^4.17.1"
+    "ws": "^7.3.0"
   }
 }
