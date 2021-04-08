@@ -1,5 +1,5 @@
 # CoCreate-socket-server
-A simple boilerplate component in vanilla javascript. Easily configured using HTML5 data-attributes and/or JavaScript API. Take it for a spin in our [playground!](https://cocreate.app/docs/boilerplate)
+A simple socket-server component in vanilla javascript. Easily configured using HTML5 data-attributes and/or JavaScript API. Take it for a spin in our [playground!](https://cocreate.app/docs/socket-server)
 
 ![GitHub latest release](https://img.shields.io/github/v/release/CoCreate-app/CoCreate-socket-server?style=for-the-badge)
 ![GitHub](https://img.shields.io/github/license/CoCreate-app/CoCreate-socket-server?style=for-the-badge) 
@@ -7,7 +7,7 @@ A simple boilerplate component in vanilla javascript. Easily configured using HT
 
 ![CoCreate](https://cdn.cocreate.app/logo.png)
 
-[CoCreate Docs](https://cocreate.app/docs/boilerplate)
+[CoCreate Docs](https://cocreate.app/docs/socket-server)
 
 We want this library to be community-driven, and CoCreate led. We need your help to realize this goal. To help make sure we are building the right things in the right order, we ask that you create [issues](https://github.com/CoCreate-app/Realtime_Admin_CRM_and_CMS/issues) and [pull requests](https://github.com/CoCreate-app/Realtime_Admin_CRM_and_CMS/pulls) or merely upvote or comment on existing issues or pull requests.
 
