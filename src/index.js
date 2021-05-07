@@ -17,6 +17,16 @@ class SocketServer extends EventEmitter{
 		
 		//. websocket server
 		this.wss = new WebSocket.Server({noServer: true});
+		this.permissionInstance = null;
+		this.authInstance = null;
+	}
+	
+	setPermission(instance) {
+		this.permissionInstance = instance;
+	}
+	
+	setAuth(instance) {
+		this.authInstance = instance
 	}
 	
 	handleUpgrade(req, socket, head) {
@@ -37,8 +47,8 @@ class SocketServer extends EventEmitter{
 		
 		this.addClient(ws, info.key, info);
 		
-		ws.on('message', (message) => {
-			self.onMessage(ws, message, info);
+		ws.on('message', async (message) => {
+			await self.onMessage(req, ws, message, info);
 		})
 		
 		ws.on('close', function () {
@@ -121,8 +131,7 @@ class SocketServer extends EventEmitter{
 		return params
 	}
 	
-	onMessage(ws, message, roomInfo) {
-		
+	async onMessage(req, ws, message, roomInfo) {
 		try {
 			this.recordTransfer('in', message, roomInfo.orgId)
 
@@ -133,8 +142,21 @@ class SocketServer extends EventEmitter{
 			
 			const requestData = JSON.parse(message)
 			let cloneRoomInfo = {...roomInfo};
-			
+
 			if (requestData.action) {
+				let user_id = null;
+				if (this.authInstance) {
+					user_id = await this.authInstance.getUserId(req);
+				}
+				//. check permission
+				if (this.permissionInstance) {
+					let passStatus = await this.permissionInstance.check(requestData.action, requestData.data, req, user_id)
+					if (!passStatus) {
+						this.send(ws, 'permissionError', requestData.data, cloneRoomInfo.orgId, cloneRoomInfo)
+						return;
+					}
+				}
+
 				//. checking async status....				
 				if (requestData.data.async == true) {
 					const uuid = GenerateUUID(), asyncMessage = this.asyncMessages.get(cloneRoomInfo.key);
