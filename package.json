@@ -33,13 +33,14 @@
     "url": "git+https://github.com/CoCreate-app/CoCreate-socket-server.git"
   },
   "author": "CoCreate LLC",
-  "license": "unlicensed",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/CoCreate-app/CoCreate-socket-server/issues"
   },
   "homepage": "https://cocreate.app/docs/CoCreate-socket-server",
   "dependencies": {
     "@cocreate/docs": "^1.0.3",
+    "@cocreate/uuid": "^1.0.5",
     "querystring": "^0.2.0",
     "ws": "^7.3.0"
   },

@@ -4,7 +4,7 @@ const WebSocket = require('ws');
 const url = require("url");
 const EventEmitter = require("events").EventEmitter;
 const AsyncMessage = require("./AsyncMessage")
-const { GenerateUUID } = require("./utils")
+const CoCreateUUID = require('@cocreate/uuid')
 
 class SocketServer extends EventEmitter{
 	constructor(prefix) {
@@ -46,7 +46,7 @@ class SocketServer extends EventEmitter{
 		const self = this;
 		
 		this.addClient(ws, info.key, info);
-		
+
 		ws.on('message', async (message) => {
 			await self.onMessage(req, ws, message, info);
 		})
@@ -159,7 +159,7 @@ class SocketServer extends EventEmitter{
 
 				//. checking async status....				
 				if (requestData.data.async == true) {
-					const uuid = GenerateUUID(), asyncMessage = this.asyncMessages.get(cloneRoomInfo.key);
+					const uuid = CoCreateUUID.generate(), asyncMessage = this.asyncMessages.get(cloneRoomInfo.key);
 					cloneRoomInfo.asyncId = uuid;
 					if (asyncMessage) {
 						asyncMessage.defineMessage(uuid);
@@ -181,7 +181,7 @@ class SocketServer extends EventEmitter{
 	broadcast(ws, namespace, room, messageType, data, isExact, roomInfo) {
 		const self = this;
 		const asyncId = this.getAsyncId(roomInfo)
-	    let room_key = this.prefix + "/" + namespace;
+	    let room_key = `/${this.prefix}/${namespace}`;
 	    if (room) {
 	    	room_key += `/${room}`;	
 	    }
@@ -198,6 +198,8 @@ class SocketServer extends EventEmitter{
 		
 		if (isExact) {
 			const clients = this.clients.get(room_key);
+			// console.log('client-count, room_key', clients, room_key)
+			// console.log(clients.length)
 			
 			if (clients) {
 				clients.forEach((client) => {
@@ -213,7 +215,9 @@ class SocketServer extends EventEmitter{
 			}
 			
 		} else {
+			
 			this.clients.forEach((value, key) => {
+				console.log(value.length, key)
 				if (key.includes(room_key)) {
 					value.forEach(client => {
 						if (ws != client) {
