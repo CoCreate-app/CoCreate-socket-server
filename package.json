@@ -1,6 +1,6 @@
 {
   "name": "@cocreate/socket-server",
-  "version": "0.5.5",
+  "version": "1.1.4",
   "description": "CoCreate-socket-server",
   "keywords": [
     "cocreate-socket",
@@ -20,7 +20,7 @@
     "html5-framework",
     "javascript-framework"
   ],
-    "publishConfig": {
+  "publishConfig": {
     "access": "public"
   },
   "main": "index.js",
