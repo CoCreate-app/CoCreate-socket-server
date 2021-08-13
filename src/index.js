@@ -134,9 +134,11 @@ class SocketServer extends EventEmitter{
 	async onMessage(req, ws, message, roomInfo) {
 		try {
 			this.recordTransfer('in', message, roomInfo.orgId)
-
+			
+			// ToDo remove
 			if (message instanceof Buffer) {
-				this.emit('importFile2DB', ws, message, roomInfo)
+				this.emit('importFile2DB', ws, message, roomInfo);
+				console.log('importFile2DB', ws, message, roomInfo);
 				return;
 			}
 			
