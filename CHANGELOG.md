@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.4...v1.1.5) (2021-08-13)
+
+
+### Bug Fixes
+
+* filetodb consolelog and data- removed ([2a5e351](https://github.com/CoCreate-app/CoCreate-socket-server/commit/2a5e351967eb48a7437a00a85f7a3f88d08b8f07))
+
 ## [1.1.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.3...v1.1.4) (2021-07-28)
 
 
