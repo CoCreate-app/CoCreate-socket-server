@@ -1,3 +1,10 @@
+## [1.1.6](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.5...v1.1.6) (2021-11-01)
+
+
+### Bug Fixes
+
+* add apikey.js ([9d73042](https://github.com/CoCreate-app/CoCreate-socket-server/commit/9d73042e5e0e274b990d1a76a0de0e5fed7bea74))
+
 ## [1.1.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.4...v1.1.5) (2021-08-13)
 
 
