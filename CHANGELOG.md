@@ -1,3 +1,11 @@
+## [1.1.8](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.7...v1.1.8) (2021-11-11)
+
+
+### Bug Fixes
+
+* licensing information ([db7ffb0](https://github.com/CoCreate-app/CoCreate-socket-server/commit/db7ffb0c4cf5b01282a90956e593c9509b4ff801))
+* update readme ([ae9401f](https://github.com/CoCreate-app/CoCreate-socket-server/commit/ae9401fbe482d01c39074a9612c805c7c5d9596b))
+
 ## [1.1.7](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.6...v1.1.7) (2021-11-11)
 
 
