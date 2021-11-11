@@ -1,9 +1,10 @@
 # CoCreate-socket-server
 A simple socket-server component in vanilla javascript. Easily configured using HTML5 data-attributes and/or JavaScript API. Take it for a spin in our [playground!](https://cocreate.app/docs/socket-server)
 
-![GitHub latest release](https://img.shields.io/github/v/release/CoCreate-app/CoCreate-socket-server?style=for-the-badge)
-![GitHub](https://img.shields.io/github/license/CoCreate-app/CoCreate-socket-server?style=for-the-badge) 
-![GitHub labels](https://img.shields.io/github/labels/CoCreate-app/CoCreate-socket-server/help%20wanted?style=for-the-badge)
+![GitHub latest release](https://img.shields.io/github/v/release/CoCreate-app/CoCreate-socket-server?style=flat-square)
+![GitHub contributors](https://img.shields.io/github/contributors/CoCreate-app/CoCreate-socket-server?style=flat-square)
+![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=SSPL&color=green)
+![Hiring](https://img.shields.io/static/v1?style=flat-square&label=&message=Hiring&color=blueviolet)
 
 ![CoCreate](https://cdn.cocreate.app/logo.png)
 
