@@ -26,7 +26,8 @@
   "main": "index.js",
   "scripts": {
     "demo": "PORT=5000 node demo/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs": "node ./node_modules/@cocreate/docs/src/index.js"
   },
   "repository": {
     "type": "git",
@@ -39,7 +40,7 @@
   },
   "homepage": "https://cocreate.app/docs/CoCreate-socket-server",
   "dependencies": {
-    "@cocreate/docs": "^1.0.3",
+    "@cocreate/docs": "^1.2.68",
     "@cocreate/uuid": "^1.0.5",
     "querystring": "^0.2.0",
     "ws": "^7.3.0"
