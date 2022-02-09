@@ -1,3 +1,10 @@
+## [1.1.9](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.8...v1.1.9) (2022-02-09)
+
+
+### Bug Fixes
+
+* update CoCreate.config.js, bump @cocreate/docs version ([7338129](https://github.com/CoCreate-app/CoCreate-socket-server/commit/73381299f837b4cae092bdd2272c7f47d5eef740))
+
 ## [1.1.8](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.7...v1.1.8) (2021-11-11)
 
 
