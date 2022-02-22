@@ -145,20 +145,19 @@ class SocketServer extends EventEmitter{
 			const requestData = JSON.parse(message)
 			let cloneRoomInfo = {...roomInfo};
 
-			if (requestData.action) {
+			if (requestData.module) {
 				let user_id = null;
 				if (this.authInstance) {
 					user_id = await this.authInstance.getUserId(req);
 				}
 				//. check permission
 				if (this.permissionInstance) {
-					let passStatus = await this.permissionInstance.check(requestData.action, requestData.data, req, user_id)
+					let passStatus = await this.permissionInstance.check(requestData.module, requestData.data, req, user_id)
 					if (!passStatus) {
 						this.send(ws, 'permissionError', requestData.data, cloneRoomInfo.orgId, cloneRoomInfo)
 						return;
 					}
 				}
-
 				//. checking async status....				
 				if (requestData.data.async == true) {
 					const uuid = CoCreateUUID.generate(), asyncMessage = this.asyncMessages.get(cloneRoomInfo.key);
@@ -172,7 +171,7 @@ class SocketServer extends EventEmitter{
 				if (cloneRoomInfo.orgId != null) {
 					this.emit('changeDB', ws, { db: cloneRoomInfo.orgId }, cloneRoomInfo);
 				}
-				this.emit(requestData.action, ws, requestData.data, cloneRoomInfo);
+				this.emit(requestData.module, ws, requestData.data, cloneRoomInfo);
 			}
 			
 		} catch(e) {
@@ -188,7 +187,7 @@ class SocketServer extends EventEmitter{
 	    	room_key += `/${room}`;	
 	    }
 	    const responseData =JSON.stringify({
-			action: messageType,
+			module: messageType,
 			data: data
 		});
 		
@@ -245,7 +244,7 @@ class SocketServer extends EventEmitter{
 	send(ws, messageType,  data, orgId, roomInfo){
 		const asyncId = this.getAsyncId(roomInfo)
 		let responseData = JSON.stringify({
-			action: messageType,
+			module: messageType,
 			data: data
 		});
 
