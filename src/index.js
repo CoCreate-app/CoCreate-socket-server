@@ -150,6 +150,7 @@ class SocketServer extends EventEmitter{
 				if (this.authInstance) {
 					user_id = await this.authInstance.getUserId(req);
 				}
+
 				//. check permission
 				if (this.permissionInstance) {
 					let passStatus = await this.permissionInstance.check(requestData.module, requestData.data, req, user_id)
@@ -158,6 +159,7 @@ class SocketServer extends EventEmitter{
 						return;
 					}
 				}
+				
 				//. checking async status....				
 				if (requestData.data.async == true) {
 					const uuid = CoCreateUUID.generate(), asyncMessage = this.asyncMessages.get(cloneRoomInfo.key);
