@@ -23,7 +23,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "index.js",
+  "main": "./src/index",
   "scripts": {
     "demo": "PORT=5000 node demo/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
