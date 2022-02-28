@@ -1,3 +1,11 @@
+## [1.1.12](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.11...v1.1.12) (2022-02-28)
+
+
+### Bug Fixes
+
+* update param requestData.action to requestData.module ([8a1a7e0](https://github.com/CoCreate-app/CoCreate-socket-server/commit/8a1a7e0b7eb14c948973c42e97911781e91b9e53))
+* wildcard permission for docs domain ([7a0d5cd](https://github.com/CoCreate-app/CoCreate-socket-server/commit/7a0d5cd1ca0cc275e28362333addd8c3a35b15b3))
+
 ## [1.1.11](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.10...v1.1.11) (2022-02-16)
 
 
