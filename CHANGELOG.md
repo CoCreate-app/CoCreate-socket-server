@@ -1,3 +1,11 @@
+## [1.1.13](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.12...v1.1.13) (2022-03-03)
+
+
+### Bug Fixes
+
+* removed emit changeDB ([cde4d9f](https://github.com/CoCreate-app/CoCreate-socket-server/commit/cde4d9f6f74d7cbf536eddb4a87436cc315e07fe))
+* update pakage.json main to src/index ([4188d9c](https://github.com/CoCreate-app/CoCreate-socket-server/commit/4188d9c65ef461c26cc7ea3e12d8216f20183ea5))
+
 ## [1.1.12](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.11...v1.1.12) (2022-02-28)
 
 
