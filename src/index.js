@@ -168,11 +168,6 @@ class SocketServer extends EventEmitter{
 						asyncMessage.defineMessage(uuid);
 					}
 				}
-				//. End
-				
-				if (cloneRoomInfo.orgId != null) {
-					this.emit('changeDB', ws, { db: cloneRoomInfo.orgId }, cloneRoomInfo);
-				}
 				this.emit(requestData.module, ws, requestData.data, cloneRoomInfo);
 			}
 			
@@ -218,7 +213,6 @@ class SocketServer extends EventEmitter{
 			}
 			
 		} else {
-			
 			this.clients.forEach((value, key) => {
 				console.log(value.length, key)
 				if (key.includes(room_key)) {
