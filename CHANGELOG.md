@@ -1,3 +1,18 @@
+# [1.2.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.13...v1.2.0) (2022-03-06)
+
+
+### Bug Fixes
+
+* broadcast_sender if condition ([663da41](https://github.com/CoCreate-app/CoCreate-socket-server/commit/663da417cb127048a5bf7be92b3988ba88c9ad37))
+* removed querystring dependancy ([340b131](https://github.com/CoCreate-app/CoCreate-socket-server/commit/340b13124fc3d222cdd57c0b20db0913a71eb807))
+* update param roomInfo to socketInfo ([7d651d6](https://github.com/CoCreate-app/CoCreate-socket-server/commit/7d651d65b1299b18499559a747eba6b10395ef00))
+* update param ws to socket for convetion purposes ([17e5989](https://github.com/CoCreate-app/CoCreate-socket-server/commit/17e598940acec73286465c5947a9b9b9d58b0c56))
+
+
+### Features
+
+* broadcast supports multiple rooms ([a8edf12](https://github.com/CoCreate-app/CoCreate-socket-server/commit/a8edf125e0b925e597bd54f7179e1c9aae3b39c3))
+
 ## [1.1.13](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.12...v1.1.13) (2022-03-03)
 
 
