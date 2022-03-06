@@ -34,45 +34,45 @@ class SocketServer extends EventEmitter{
 		const pathname = url.parse(req.url).pathname;
 		const url_info = this.getKeyFromUrl(pathname)
 		if (url_info.type == this.prefix) {
-			self.wss.handleUpgrade(req, socket, head, function(ws) {
-				self.onWebSocket(req, ws, url_info);
+			self.wss.handleUpgrade(req, socket, head, function(socket) {
+				self.onWebSocket(req, socket, url_info);
 			})
 			return true;
 		}
 		return false;
 	}
 	
-	onWebSocket(req, ws, info) {
+	onWebSocket(req, socket, info) {
 		const self = this;
 		
-		this.addClient(ws, info.key, info);
+		this.addClient(socket, info.key, info);
 
-		ws.on('message', async (message) => {
-			await self.onMessage(req, ws, message, info);
+		socket.on('message', async (message) => {
+			await self.onMessage(req, socket, message, info);
 		})
 		
-		ws.on('close', function () {
-			self.removeClient(ws, info.key, info)
+		socket.on('close', function () {
+			self.removeClient(socket, info.key, info)
 		})
 
-		ws.on("error", () => {
-			self.removeClient(ws, info.key, info)
+		socket.on("error", () => {
+			self.removeClient(socket, info.key, info)
 		});
 		
-		this.send(ws, 'connect', info.key);
+		this.send(socket, 'connect', info.key);
 		
 	}
 	
-	removeClient(ws, key, roomInfo) {
+	removeClient(socket, key, roomInfo) {
 		let room_clients = this.clients.get(key)
-		const index = room_clients.indexOf(ws);
+		const index = room_clients.indexOf(socket);
 
 		if (index > -1) {
 			room_clients.splice(index, 1);
 		}
 		
 		if (room_clients.length == 0) {
-			this.emit('userStatus', ws, {info: key.replace(`/${this.prefix}/`, ''), status: 'off'}, roomInfo);
+			this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'off'}, roomInfo);
 			this.emit("removeMetrics", null, { org_id: roomInfo.orgId });
 			// this.addAsyncMessage.delete(key);
 		} else {
@@ -88,17 +88,17 @@ class SocketServer extends EventEmitter{
 		
 	}
 	
-	addClient(ws, key, roomInfo) {
+	addClient(socket, key, roomInfo) {
 		let room_clients = this.clients.get(key);
 		if (room_clients) {
-			room_clients.push(ws);
+			room_clients.push(socket);
 		} else {
-			room_clients = [ws];
+			room_clients = [socket];
 		}
 		this.clients.set(key, room_clients);
 		this.addAsyncMessage(roomInfo.key)
 		
-		this.emit('userStatus', ws, {info: key.replace(`/${this.prefix}/`, ''), status: 'on'}, roomInfo);
+		this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'on'}, roomInfo);
 
 		//. add metrics
 		let total_cnt = 0;
@@ -131,14 +131,14 @@ class SocketServer extends EventEmitter{
 		return params
 	}
 	
-	async onMessage(req, ws, message, roomInfo) {
+	async onMessage(req, socket, message, roomInfo) {
 		try {
 			this.recordTransfer('in', message, roomInfo.orgId)
 			
 			// ToDo remove
 			if (message instanceof Buffer) {
-				this.emit('importFile2DB', ws, message, roomInfo);
-				console.log('importFile2DB', ws, message, roomInfo);
+				this.emit('importFile2DB', socket, message, roomInfo);
+				console.log('importFile2DB', socket, message, roomInfo);
 				return;
 			}
 			
@@ -155,7 +155,7 @@ class SocketServer extends EventEmitter{
 				if (this.permissionInstance) {
 					let passStatus = await this.permissionInstance.check(requestData.module, requestData.data, req, user_id)
 					if (!passStatus) {
-						this.send(ws, 'permissionError', requestData.data, cloneRoomInfo.orgId, cloneRoomInfo)
+						this.send(socket, 'permissionError', requestData.data, cloneRoomInfo.orgId, cloneRoomInfo)
 						return;
 					}
 				}
@@ -168,7 +168,7 @@ class SocketServer extends EventEmitter{
 						asyncMessage.defineMessage(uuid);
 					}
 				}
-				this.emit(requestData.module, ws, requestData.data, cloneRoomInfo);
+				this.emit(requestData.module, socket, requestData.data, cloneRoomInfo);
 			}
 			
 		} catch(e) {
@@ -176,7 +176,7 @@ class SocketServer extends EventEmitter{
 		}
 	}
 	
-	broadcast(ws, namespace, rooms, messageType, data, roomInfo) {
+	broadcast(socket, namespace, rooms, messageType, data, roomInfo) {
 		const self = this;
 		const asyncId = this.getAsyncId(roomInfo)
 	    let room_key = `/${this.prefix}/${namespace}`;
@@ -205,7 +205,7 @@ class SocketServer extends EventEmitter{
 				
 				if (clients) {
 					clients.forEach((client) => {
-						if (ws != client) {
+						if (socket != client) {
 							if (isAsync) {
 								asyncData.push({socket: client, message: responseData})
 							} else {
@@ -222,7 +222,7 @@ class SocketServer extends EventEmitter{
 				console.log(value.length, key)
 				if (key.includes(room_key)) {
 					value.forEach(client => {
-						if (ws != client) {
+						if (socket != client) {
 							if (isAsync) {
 								asyncData.push({socket: client, message: responseData})
 							} else {
@@ -242,7 +242,7 @@ class SocketServer extends EventEmitter{
 		
 	}
 	
-	send(ws, messageType, data, orgId, roomInfo){
+	send(socket, messageType, data, orgId, roomInfo){
 		const asyncId = this.getAsyncId(roomInfo)
 		let responseData = JSON.stringify({
 			module: messageType,
@@ -250,9 +250,9 @@ class SocketServer extends EventEmitter{
 		});
 
 		if (asyncId && roomInfo && roomInfo.key) {
-			this.asyncMessages.get(roomInfo.key).setMessage(asyncId, [{socket: ws, message: responseData}]);
+			this.asyncMessages.get(roomInfo.key).setMessage(asyncId, [{socket, message: responseData}]);
 		} else {
-			ws.send(responseData);
+			socket.send(responseData);
 		}
 		this.recordTransfer('out', responseData, orgId)
 
@@ -267,8 +267,8 @@ class SocketServer extends EventEmitter{
 		return null
 	}
 	
-	sendBinary(ws, data, orgId) {
-		ws.send(data, {binary: true});
+	sendBinary(socket, data, orgId) {
+		socket.send(data, {binary: true});
 		this.recordTransfer('out', data, orgId)
 	}
 	
