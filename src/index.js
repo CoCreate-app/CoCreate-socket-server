@@ -1,5 +1,3 @@
-
-const qs = require('querystring');
 const WebSocket = require('ws');
 const url = require("url");
 const EventEmitter = require("events").EventEmitter;

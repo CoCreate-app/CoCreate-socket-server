@@ -41,9 +41,7 @@
   "homepage": "https://cocreate.app/docs/CoCreate-socket-server",
   "dependencies": {
     "@cocreate/docs": "^1.2.70",
-    "@cocreate/uuid": "^1.1.60",
-    "querystring": "^0.2.0",
-    "ws": "^7.3.0"
+    "@cocreate/uuid": "^1.1.60"
   },
   "devDependencies": {
     "express": "^4.17.1",
