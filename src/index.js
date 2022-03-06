@@ -30,38 +30,38 @@ class SocketServer extends EventEmitter{
 	handleUpgrade(req, socket, head) {
 		const self = this;
 		const pathname = url.parse(req.url).pathname;
-		const url_info = this.getKeyFromUrl(pathname)
-		if (url_info.type == this.prefix) {
+		const socketInfo = this.getKeyFromUrl(pathname)
+		if (socketInfo.type == this.prefix) {
 			self.wss.handleUpgrade(req, socket, head, function(socket) {
-				self.onWebSocket(req, socket, url_info);
+				self.onWebSocket(req, socket, socketInfo);
 			})
 			return true;
 		}
 		return false;
 	}
 	
-	onWebSocket(req, socket, info) {
+	onWebSocket(req, socket, socketInfo) {
 		const self = this;
 		
-		this.addClient(socket, info.key, info);
+		this.addClient(socket, socketInfo.key, socketInfo);
 
 		socket.on('message', async (message) => {
-			await self.onMessage(req, socket, message, info);
+			await self.onMessage(req, socket, message, socketInfo);
 		})
 		
 		socket.on('close', function () {
-			self.removeClient(socket, info.key, info)
+			self.removeClient(socket, socketInfo.key, socketInfo)
 		})
 
 		socket.on("error", () => {
-			self.removeClient(socket, info.key, info)
+			self.removeClient(socket, socketInfo.key, socketInfo)
 		});
 		
-		this.send(socket, 'connect', info.key);
+		this.send(socket, 'connect', socketInfo.key);
 		
 	}
 	
-	removeClient(socket, key, roomInfo) {
+	removeClient(socket, key, socketInfo) {
 		let room_clients = this.clients.get(key)
 		const index = room_clients.indexOf(socket);
 
@@ -70,15 +70,15 @@ class SocketServer extends EventEmitter{
 		}
 		
 		if (room_clients.length == 0) {
-			this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'off'}, roomInfo);
-			this.emit("removeMetrics", null, { org_id: roomInfo.orgId });
+			this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'off'}, socketInfo);
+			this.emit("removeMetrics", null, { org_id: socketInfo.orgId });
 			// this.addAsyncMessage.delete(key);
 		} else {
 			let total_cnt = 0;
 			this.clients.forEach((c) => total_cnt += c.length)
 			
 			this.emit("changeCountMetrics", null, {
-				org_id: roomInfo.orgId, 
+				org_id: socketInfo.orgId, 
 				total_cnt, 
 				client_cnt: room_clients.length
 			});
@@ -86,7 +86,7 @@ class SocketServer extends EventEmitter{
 		
 	}
 	
-	addClient(socket, key, roomInfo) {
+	addClient(socket, key, socketInfo) {
 		let room_clients = this.clients.get(key);
 		if (room_clients) {
 			room_clients.push(socket);
@@ -94,16 +94,16 @@ class SocketServer extends EventEmitter{
 			room_clients = [socket];
 		}
 		this.clients.set(key, room_clients);
-		this.addAsyncMessage(roomInfo.key)
+		this.addAsyncMessage(socketInfo.key)
 		
-		this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'on'}, roomInfo);
+		this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'on'}, socketInfo);
 
 		//. add metrics
 		let total_cnt = 0;
 		this.clients.forEach((c) => total_cnt += c.length)
 		
 		this.emit("createMetrics", null, {
-			org_id: roomInfo.orgId, 
+			org_id: socketInfo.orgId, 
 			client_cnt: room_clients.length, 
 			total_cnt: total_cnt
 		});
@@ -129,19 +129,18 @@ class SocketServer extends EventEmitter{
 		return params
 	}
 	
-	async onMessage(req, socket, message, roomInfo) {
+	async onMessage(req, socket, message, socketInfo) {
 		try {
-			this.recordTransfer('in', message, roomInfo.orgId)
+			this.recordTransfer('in', message, socketInfo.orgId)
 			
 			// ToDo remove
 			if (message instanceof Buffer) {
-				this.emit('importFile2DB', socket, message, roomInfo);
-				console.log('importFile2DB', socket, message, roomInfo);
+				this.emit('importFile2DB', socket, message, socketInfo);
+				console.log('importFile2DB', socket, message, socketInfo);
 				return;
 			}
 			
 			const requestData = JSON.parse(message)
-			let cloneRoomInfo = {...roomInfo};
 
 			if (requestData.module) {
 				let user_id = null;
@@ -153,20 +152,20 @@ class SocketServer extends EventEmitter{
 				if (this.permissionInstance) {
 					let passStatus = await this.permissionInstance.check(requestData.module, requestData.data, req, user_id)
 					if (!passStatus) {
-						this.send(socket, 'permissionError', requestData.data, cloneRoomInfo.orgId, cloneRoomInfo)
+						this.send(socket, 'permissionError', requestData.data, socketInfo.orgId, socketInfo)
 						return;
 					}
 				}
 				
 				//. checking async status....				
 				if (requestData.data.async == true) {
-					const uuid = CoCreateUUID.generate(), asyncMessage = this.asyncMessages.get(cloneRoomInfo.key);
-					cloneRoomInfo.asyncId = uuid;
+					const uuid = CoCreateUUID.generate(), asyncMessage = this.asyncMessages.get(socketInfo.key);
+					socketInfo.asyncId = uuid;
 					if (asyncMessage) {
 						asyncMessage.defineMessage(uuid);
 					}
 				}
-				this.emit(requestData.module, socket, requestData.data, cloneRoomInfo);
+				this.emit(requestData.module, socket, requestData.data, socketInfo);
 			}
 			
 		} catch(e) {
@@ -174,18 +173,18 @@ class SocketServer extends EventEmitter{
 		}
 	}
 	
-	broadcast(socket, namespace, rooms, messageType, data, roomInfo) {
+	broadcast(socket, namespace, rooms, messageName, data, socketInfo) {
 		const self = this;
-		const asyncId = this.getAsyncId(roomInfo)
+		const asyncId = this.getAsyncId(socketInfo)
 	    let room_key = `/${this.prefix}/${namespace}`;
 	    const responseData =JSON.stringify({
-			module: messageType,
+			module: messageName,
 			data: data
 		});
 		
 		let isAsync = false;
 		let asyncData = [];
-		if (asyncId && roomInfo && roomInfo.key) {
+		if (asyncId && socketInfo && socketInfo.key) {
 			isAsync = true;	
 		}
 
@@ -230,20 +229,20 @@ class SocketServer extends EventEmitter{
 		
 		//. set async processing
 		if (isAsync) {
-			this.asyncMessages.get(roomInfo.key).setMessage(asyncId, asyncData)
+			this.asyncMessages.get(socketInfo.key).setMessage(asyncId, asyncData)
 		}
 		
 	}
 	
-	send(socket, messageType, data, orgId, roomInfo){
-		const asyncId = this.getAsyncId(roomInfo)
+	send(socket, messageName, data, orgId, socketInfo){
+		const asyncId = this.getAsyncId(socketInfo)
 		let responseData = JSON.stringify({
-			module: messageType,
+			module: messageName,
 			data: data
 		});
 
-		if (asyncId && roomInfo && roomInfo.key) {
-			this.asyncMessages.get(roomInfo.key).setMessage(asyncId, [{socket, message: responseData}]);
+		if (asyncId && socketInfo && socketInfo.key) {
+			this.asyncMessages.get(socketInfo.key).setMessage(asyncId, [{socket, message: responseData}]);
 		} else {
 			socket.send(responseData);
 		}
@@ -251,11 +250,11 @@ class SocketServer extends EventEmitter{
 
 	}
 	
-	getAsyncId(roomInfo) {
-		if (!roomInfo) return null;
+	getAsyncId(socketInfo) {
+		if (!socketInfo) return null;
 		
-		if (roomInfo.asyncId) {
-			return roomInfo.asyncId;
+		if (socketInfo.asyncId) {
+			return socketInfo.asyncId;
 		}
 		return null
 	}
