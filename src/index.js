@@ -176,13 +176,10 @@ class SocketServer extends EventEmitter{
 		}
 	}
 	
-	broadcast(ws, namespace, room, messageType, data, isExact, roomInfo) {
+	broadcast(ws, namespace, rooms, messageType, data, roomInfo) {
 		const self = this;
 		const asyncId = this.getAsyncId(roomInfo)
 	    let room_key = `/${this.prefix}/${namespace}`;
-	    if (room) {
-	    	room_key += `/${room}`;	
-	    }
 	    const responseData =JSON.stringify({
 			module: messageType,
 			data: data
@@ -193,23 +190,31 @@ class SocketServer extends EventEmitter{
 		if (asyncId && roomInfo && roomInfo.key) {
 			isAsync = true;	
 		}
-		
-		if (isExact) {
-			const clients = this.clients.get(room_key);
-			// console.log('client-count, room_key', clients, room_key)
-			// console.log(clients.length)
-			
-			if (clients) {
-				clients.forEach((client) => {
-					if (ws != client) {
-						if (isAsync) {
-							asyncData.push({socket: client, message: responseData})
-						} else {
-							client.send(responseData);
+		// if (room) {
+	    // 	room_key += `/${room}`;	
+	    // }
+
+		if (rooms) {
+			if (!rooms.isArray())
+				rooms = [rooms]
+			for (let room of rooms) {
+				room_key += `/${room}`;	
+				const clients = this.clients.get(room_key);
+				// console.log('client-count, room_key', clients, room_key)
+				// console.log(clients.length)
+				
+				if (clients) {
+					clients.forEach((client) => {
+						if (ws != client) {
+							if (isAsync) {
+								asyncData.push({socket: client, message: responseData})
+							} else {
+								client.send(responseData);
+							}
+							self.recordTransfer('out', responseData, namespace)
 						}
-						self.recordTransfer('out', responseData, namespace)
-					}
-				})
+					})
+				}
 			}
 			
 		} else {
@@ -237,7 +242,7 @@ class SocketServer extends EventEmitter{
 		
 	}
 	
-	send(ws, messageType,  data, orgId, roomInfo){
+	send(ws, messageType, data, orgId, roomInfo){
 		const asyncId = this.getAsyncId(roomInfo)
 		let responseData = JSON.stringify({
 			module: messageType,
