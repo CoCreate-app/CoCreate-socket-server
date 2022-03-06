@@ -190,9 +190,6 @@ class SocketServer extends EventEmitter{
 		if (asyncId && roomInfo && roomInfo.key) {
 			isAsync = true;	
 		}
-		// if (room) {
-	    // 	room_key += `/${room}`;	
-	    // }
 
 		if (rooms) {
 			if (!rooms.isArray())
@@ -200,12 +197,10 @@ class SocketServer extends EventEmitter{
 			for (let room of rooms) {
 				room_key += `/${room}`;	
 				const clients = this.clients.get(room_key);
-				// console.log('client-count, room_key', clients, room_key)
-				// console.log(clients.length)
-				
+
 				if (clients) {
 					clients.forEach((client) => {
-						if (socket != client) {
+						if (socket != client || socket == client && data.broadcast_sender != false) {
 							if (isAsync) {
 								asyncData.push({socket: client, message: responseData})
 							} else {
@@ -222,7 +217,7 @@ class SocketServer extends EventEmitter{
 				console.log(value.length, key)
 				if (key.includes(room_key)) {
 					value.forEach(client => {
-						if (socket != client) {
+						if (socket != client || socket == client && data.broadcast_sender != false) {
 							if (isAsync) {
 								asyncData.push({socket: client, message: responseData})
 							} else {
