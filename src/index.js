@@ -211,7 +211,6 @@ class SocketServer extends EventEmitter{
 			
 		} else {
 			this.clients.forEach((value, key) => {
-				console.log(value.length, key)
 				if (key.includes(room_key)) {
 					value.forEach(client => {
 						if (socket != client || socket == client && data.broadcast_sender != false) {
