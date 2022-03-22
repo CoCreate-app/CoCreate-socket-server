@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.2.0...v1.2.1) (2022-03-22)
+
+
+### Bug Fixes
+
+* removed testing console.logs ([48358eb](https://github.com/CoCreate-app/CoCreate-socket-server/commit/48358eb3939e60c9401defb774161cbd65b6e774))
+
 # [1.2.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.1.13...v1.2.0) (2022-03-06)
 
 
