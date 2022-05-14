@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.2.2...v1.3.0) (2022-05-14)
+
+
+### Features
+
+* function readDocumentList has been renamed to readDocuments ([f4714c0](https://github.com/CoCreate-app/CoCreate-socket-server/commit/f4714c060d169076b47a94493e11eb6b847194e3))
+
 ## [1.2.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.2.1...v1.2.2) (2022-05-06)
 
 
