@@ -159,6 +159,7 @@ class SocketServer extends EventEmitter{
 				
 				//. checking async status....				
 				if (requestData.data.async == true) {
+					console.log('async true')
 					const uuid = CoCreateUUID.generate(), asyncMessage = this.asyncMessages.get(socketInfo.key);
 					socketInfo.asyncId = uuid;
 					if (asyncMessage) {
@@ -233,7 +234,7 @@ class SocketServer extends EventEmitter{
 		
 	}
 	
-	send(socket, messageName, data, orgId, socketInfo){
+	send(socket, messageName, data, socketInfo){
 		const asyncId = this.getAsyncId(socketInfo)
 		let responseData = JSON.stringify({
 			module: messageName,
@@ -245,7 +246,9 @@ class SocketServer extends EventEmitter{
 		} else {
 			socket.send(responseData);
 		}
-		this.recordTransfer('out', responseData, orgId)
+
+		if (socketInfo && socketInfo.orgId)
+		this.recordTransfer('out', responseData, socketInfo.orgId)
 
 	}
 	
