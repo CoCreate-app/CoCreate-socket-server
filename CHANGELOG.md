@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.3.0...v1.3.1) (2022-05-17)
+
+
+### Bug Fixes
+
+* get orgId from socketInfo ([481821e](https://github.com/CoCreate-app/CoCreate-socket-server/commit/481821ecf9a53bc9618d8bb87b11f4509270aced))
+
 # [1.3.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.2.2...v1.3.0) (2022-05-14)
 
 
