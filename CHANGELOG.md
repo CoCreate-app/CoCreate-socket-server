@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.3.2...v1.3.3) (2022-08-31)
+
+
+### Bug Fixes
+
+* renamed variable broadcast_sender to broadcastSender ([752c5f6](https://github.com/CoCreate-app/CoCreate-socket-server/commit/752c5f6b7ce850ab81883ee39ace9922093bcf5b))
+
 ## [1.3.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.3.1...v1.3.2) (2022-07-25)
 
 
