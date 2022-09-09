@@ -45,6 +45,6 @@
   },
   "devDependencies": {
     "express": "^4.17.1",
-    "ws": "^7.3.0"
+    "ws": "7.5.9"
   }
 }

@@ -238,7 +238,7 @@ class SocketServer extends EventEmitter{
 		const asyncId = this.getAsyncId(socketInfo)
 		let responseData = JSON.stringify({
 			module: messageName,
-			data: data
+			data
 		});
 
 		if (asyncId && socketInfo && socketInfo.key) {
