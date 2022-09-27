@@ -101,7 +101,7 @@ class SocketServer extends EventEmitter{
 		this.clients.set(key, room_clients);
 		this.addAsyncMessage(key)
 		
-		this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'on', organization_id}, socket.config);
+		this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'on', organization_id});
 
 		//. add metrics
 		let total_cnt = 0;
