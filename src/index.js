@@ -136,13 +136,12 @@ class SocketServer extends EventEmitter{
 	
 	async onMessage(req, socket, message) {
 		try {
-			let socketInfo = socket.config;
 			this.recordTransfer('in', message, socket.config.orgId)
 			
 			// ToDo remove
 			if (message instanceof Buffer) {
-				this.emit('importFile2DB', socket, message, socketInfo);
-				console.log('importFile2DB', socket, message, socketInfo);
+				this.emit('importFile2DB', socket, message);
+				console.log('importFile2DB', socket, message);
 				return;
 			}
 			
@@ -158,7 +157,7 @@ class SocketServer extends EventEmitter{
 				if (this.permissionInstance) {
 					let passStatus = await this.permissionInstance.check(requestData.module, requestData.data, req, user_id)
 					if (!passStatus) {
-						this.send(socket, 'permissionError', requestData.data, socketInfo.orgId, socketInfo)
+						this.send(socket, 'permissionError', requestData.data)
 						return;
 					}
 				}
@@ -166,13 +165,13 @@ class SocketServer extends EventEmitter{
 				//. checking async status....				
 				if (requestData.data.async == true) {
 					console.log('async true')
-					const uuid = CoCreateUUID.generate(), asyncMessage = this.asyncMessages.get(socketInfo.key);
-					socketInfo.asyncId = uuid;
+					const uuid = CoCreateUUID.generate(), asyncMessage = this.asyncMessages.get(socket.config.key);
+					socket.config.asyncId = uuid;
 					if (asyncMessage) {
 						asyncMessage.defineMessage(uuid);
 					}
 				}
-				this.emit(requestData.module, socket, requestData.data, socketInfo);
+				this.emit(requestData.module, socket, requestData.data);
 			}
 			
 		} catch(e) {
@@ -182,8 +181,7 @@ class SocketServer extends EventEmitter{
 	
 	broadcast(socket, namespace, rooms, messageName, data) {
 		const self = this;
-		let socketInfo = socket.config;
-		const asyncId = this.getAsyncId(socketInfo)
+		const asyncId = socket.config.asyncId
 	    let room_key = `/${this.prefix}/${namespace}`;
 	    const responseData =JSON.stringify({
 			module: messageName,
@@ -192,7 +190,7 @@ class SocketServer extends EventEmitter{
 		
 		let isAsync = false;
 		let asyncData = [];
-		if (asyncId && socketInfo && socketInfo.key) {
+		if (asyncId && socket.config && socket.config.key) {
 			isAsync = true;	
 		}
 
@@ -236,39 +234,29 @@ class SocketServer extends EventEmitter{
 		
 		//. set async processing
 		if (isAsync) {
-			this.asyncMessages.get(socketInfo.key).setMessage(asyncId, asyncData)
+			this.asyncMessages.get(socket.config.key).setMessage(asyncId, asyncData)
 		}
 		
 	}
 	
 	send(socket, messageName, data){
-		let socketInfo = socket.config;
-		const asyncId = this.getAsyncId(socketInfo)
+		const asyncId = socket.config.asyncId
 		let responseData = JSON.stringify({
 			module: messageName,
 			data
 		});
 
-		if (asyncId && socketInfo && socketInfo.key) {
-			this.asyncMessages.get(socketInfo.key).setMessage(asyncId, [{socket, message: responseData}]);
+		if (asyncId && socket.config && socket.config.key) {
+			this.asyncMessages.get(socket.config.key).setMessage(asyncId, [{socket, message: responseData}]);
 		} else {
 			socket.send(responseData);
 		}
 
-		if (socketInfo && socketInfo.orgId)
-		this.recordTransfer('out', responseData, socketInfo.orgId)
+		if (socket.config && socket.config.orgId)
+			this.recordTransfer('out', responseData, socket.config.orgId)
 
 	}
-	
-	getAsyncId(socketInfo) {
-		if (!socketInfo) return null;
 		
-		if (socketInfo.asyncId) {
-			return socketInfo.asyncId;
-		}
-		return null
-	}
-	
 	sendBinary(socket, data, orgId) {
 		socket.send(data, {binary: true});
 		this.recordTransfer('out', data, orgId)
