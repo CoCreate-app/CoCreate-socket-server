@@ -30,38 +30,41 @@ class SocketServer extends EventEmitter{
 	handleUpgrade(req, socket, head) {
 		const self = this;
 		const pathname = url.parse(req.url).pathname;
-		const socketInfo = this.getKeyFromUrl(pathname)
-		if (socketInfo.type == this.prefix) {
+		const config = this.getKeyFromUrl(pathname)
+		if (config.type == this.prefix) {
 			self.wss.handleUpgrade(req, socket, head, function(socket) {
-				self.onWebSocket(req, socket, socketInfo);
+				socket.config = config
+				self.onWebSocket(req, socket);
 			})
 			return true;
 		}
 		return false;
 	}
 	
-	onWebSocket(req, socket, socketInfo) {
+	onWebSocket(req, socket) {
 		const self = this;
 		
-		this.addClient(socket, socketInfo.key, socketInfo);
+		this.addClient(socket);
 
 		socket.on('message', async (message) => {
-			await self.onMessage(req, socket, message, socketInfo);
+			await self.onMessage(req, socket, message);
 		})
 		
 		socket.on('close', function () {
-			self.removeClient(socket, socketInfo.key, socketInfo)
+			self.removeClient(socket)
 		})
 
 		socket.on("error", () => {
-			self.removeClient(socket, socketInfo.key, socketInfo)
+			self.removeClient(socket)
 		});
 		
-		this.send(socket, 'connect', socketInfo.key);
+		this.send(socket, 'connect', socket.config.key);
 		
 	}
 	
-	removeClient(socket, key, socketInfo) {
+	removeClient(socket) {
+		let organization_id = socket.config.orgId
+		let key = socket.config.key
 		let room_clients = this.clients.get(key)
 		const index = room_clients.indexOf(socket);
 
@@ -70,15 +73,15 @@ class SocketServer extends EventEmitter{
 		}
 		
 		if (room_clients.length == 0) {
-			this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'off'}, socketInfo);
-			this.emit("removeMetrics", null, { org_id: socketInfo.orgId });
+			this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'off', organization_id}, socket.config);
+			this.emit("removeMetrics", null, { org_id: organization_id });
 			// this.addAsyncMessage.delete(key);
 		} else {
 			let total_cnt = 0;
 			this.clients.forEach((c) => total_cnt += c.length)
 			
 			this.emit("changeCountMetrics", null, {
-				org_id: socketInfo.orgId, 
+				org_id: organization_id, 
 				total_cnt, 
 				client_cnt: room_clients.length
 			});
@@ -86,7 +89,9 @@ class SocketServer extends EventEmitter{
 		
 	}
 	
-	addClient(socket, key, socketInfo) {
+	addClient(socket) {
+		let organization_id = socket.config.orgId
+		let key = socket.config.key
 		let room_clients = this.clients.get(key);
 		if (room_clients) {
 			room_clients.push(socket);
@@ -94,16 +99,16 @@ class SocketServer extends EventEmitter{
 			room_clients = [socket];
 		}
 		this.clients.set(key, room_clients);
-		this.addAsyncMessage(socketInfo.key)
+		this.addAsyncMessage(key)
 		
-		this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'on'}, socketInfo);
+		this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'on', organization_id}, socket.config);
 
 		//. add metrics
 		let total_cnt = 0;
 		this.clients.forEach((c) => total_cnt += c.length)
 		
 		this.emit("createMetrics", null, {
-			org_id: socketInfo.orgId, 
+			org_id: organization_id, 
 			client_cnt: room_clients.length, 
 			total_cnt: total_cnt
 		});
@@ -129,9 +134,10 @@ class SocketServer extends EventEmitter{
 		return params
 	}
 	
-	async onMessage(req, socket, message, socketInfo) {
+	async onMessage(req, socket, message) {
 		try {
-			this.recordTransfer('in', message, socketInfo.orgId)
+			let socketInfo = socket.config;
+			this.recordTransfer('in', message, socket.config.orgId)
 			
 			// ToDo remove
 			if (message instanceof Buffer) {
@@ -174,8 +180,9 @@ class SocketServer extends EventEmitter{
 		}
 	}
 	
-	broadcast(socket, namespace, rooms, messageName, data, socketInfo) {
+	broadcast(socket, namespace, rooms, messageName, data) {
 		const self = this;
+		let socketInfo = socket.config;
 		const asyncId = this.getAsyncId(socketInfo)
 	    let room_key = `/${this.prefix}/${namespace}`;
 	    const responseData =JSON.stringify({
@@ -234,7 +241,8 @@ class SocketServer extends EventEmitter{
 		
 	}
 	
-	send(socket, messageName, data, socketInfo){
+	send(socket, messageName, data){
+		let socketInfo = socket.config;
 		const asyncId = this.getAsyncId(socketInfo)
 		let responseData = JSON.stringify({
 			module: messageName,
