@@ -47,7 +47,7 @@ class SocketServer extends EventEmitter{
 		this.addClient(socket);
 
 		socket.on('message', async (message) => {
-			await self.onMessage(req, socket, message);
+			self.onMessage(req, socket, message);
 		})
 		
 		socket.on('close', function () {
@@ -64,6 +64,7 @@ class SocketServer extends EventEmitter{
 	
 	removeClient(socket) {
 		let organization_id = socket.config.orgId
+		let user_id = socket.config.user_id
 		let key = socket.config.key
 		let room_clients = this.clients.get(key)
 		const index = room_clients.indexOf(socket);
@@ -73,7 +74,9 @@ class SocketServer extends EventEmitter{
 		}
 		
 		if (room_clients.length == 0) {
-			this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'off', organization_id}, socket.config);
+			if (user_id)
+				this.emit('userStatus', socket, {user_id, status: 'off', organization_id});
+			
 			this.emit("removeMetrics", null, { org_id: organization_id });
 			// this.addAsyncMessage.delete(key);
 		} else {
@@ -101,8 +104,6 @@ class SocketServer extends EventEmitter{
 		this.clients.set(key, room_clients);
 		this.addAsyncMessage(key)
 		
-		this.emit('userStatus', socket, {info: key.replace(`/${this.prefix}/`, ''), status: 'on', organization_id});
-
 		//. add metrics
 		let total_cnt = 0;
 		this.clients.forEach((c) => total_cnt += c.length)
@@ -136,7 +137,8 @@ class SocketServer extends EventEmitter{
 	
 	async onMessage(req, socket, message) {
 		try {
-			this.recordTransfer('in', message, socket.config.orgId)
+			const organization_id = socket.config.orgId
+			this.recordTransfer('in', message, organization_id)
 			
 			// ToDo remove
 			if (message instanceof Buffer) {
@@ -151,6 +153,13 @@ class SocketServer extends EventEmitter{
 				let user_id = null;
 				if (this.authInstance) {
 					user_id = await this.authInstance.getUserId(req);
+				}
+				if (user_id) {
+					if (!socket.config.user_id ) {
+						socket.config.user_id = user_id
+
+					this.emit('userStatus', socket, {user_id, status: 'on', organization_id});
+					}
 				}
 
 				//. check permission
@@ -179,27 +188,36 @@ class SocketServer extends EventEmitter{
 		}
 	}
 	
-	broadcast(socket, namespace, rooms, messageName, data) {
+	broadcast(socket, messageName, data) {
 		const self = this;
-		const asyncId = socket.config.asyncId
-	    let room_key = `/${this.prefix}/${namespace}`;
-	    const responseData =JSON.stringify({
+		const responseData = JSON.stringify({
 			module: messageName,
 			data: data
 		});
-		
+
+		const asyncId = socket.config.asyncId
 		let isAsync = false;
 		let asyncData = [];
 		if (asyncId && socket.config && socket.config.key) {
 			isAsync = true;	
 		}
 
+		let organization_id = socket.config.orgId;
+	    let url = `/${this.prefix}/${organization_id}`;
+		
+		let namespace = data.namespace;
+		if (namespace) {
+			url += `/${namespace}`
+		}
+
+		let rooms = data.room;
 		if (rooms) {
 			if (!rooms.isArray())
 				rooms = [rooms]
 			for (let room of rooms) {
-				room_key += `/${room}`;	
-				const clients = this.clients.get(room_key);
+				let url = url;
+				url += `/${room}`;	
+				const clients = this.clients.get(url);
 
 				if (clients) {
 					clients.forEach((client) => {
@@ -209,7 +227,7 @@ class SocketServer extends EventEmitter{
 							} else {
 								client.send(responseData);
 							}
-							self.recordTransfer('out', responseData, namespace)
+							self.recordTransfer('out', responseData, organization_id)
 						}
 					})
 				}
@@ -217,7 +235,7 @@ class SocketServer extends EventEmitter{
 			
 		} else {
 			this.clients.forEach((value, key) => {
-				if (key.includes(room_key)) {
+				if (key.includes(url)) {
 					value.forEach(client => {
 						if (socket != client || socket == client && data.broadcastSender != false) {
 							if (isAsync) {
@@ -225,7 +243,7 @@ class SocketServer extends EventEmitter{
 							} else {
 								client.send(responseData);
 							}
-							self.recordTransfer('out', responseData, namespace)
+							self.recordTransfer('out', responseData, organization_id)
 						}
 					})
 				}
