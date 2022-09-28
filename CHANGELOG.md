@@ -1,3 +1,19 @@
+# [1.4.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.3.4...v1.4.0) (2022-09-28)
+
+
+### Bug Fixes
+
+* asyncMessages.delete ([d24d0de](https://github.com/CoCreate-app/CoCreate-socket-server/commit/d24d0de90b7a99b3bbcd84fece5ce86728f68260))
+* broadcast params reduced to socket, message, data. emit updateUserStatus ([bfc40a7](https://github.com/CoCreate-app/CoCreate-socket-server/commit/bfc40a754e7f55f23febaaa15534aed3d7ce30ae))
+* bump ws version to 7.5.9 ([910c246](https://github.com/CoCreate-app/CoCreate-socket-server/commit/910c246153f4259af25d19901b4f0a6a30866174))
+* remove param socketInfo when emitting userStatus ([ae45514](https://github.com/CoCreate-app/CoCreate-socket-server/commit/ae45514f1c9435ba0d8217d2c13bc3f9df31d7d7))
+* replaced socketInfo with socket.config ([0e2b047](https://github.com/CoCreate-app/CoCreate-socket-server/commit/0e2b047419313eb4e8023991ae9be4140d80a551))
+
+
+### Features
+
+* config is now accessible from socket.config ([549ea18](https://github.com/CoCreate-app/CoCreate-socket-server/commit/549ea18180e64a4df9769774881c08a8a5b1cc17))
+
 ## [1.3.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.3.3...v1.3.4) (2022-09-01)
 
 
