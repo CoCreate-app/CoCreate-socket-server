@@ -62,6 +62,34 @@ class SocketServer extends EventEmitter{
 		
 	}
 	
+	addClient(socket) {
+		let organization_id = socket.config.orgId
+		let key = socket.config.key
+		let room_clients = this.clients.get(key);
+		if (room_clients) {
+			room_clients.push(socket);
+		} else {
+			room_clients = [socket];
+		}
+		this.clients.set(key, room_clients);
+		// this.addAsyncMessage(key)
+
+		let asyncMessage = this.asyncMessages.get(key)
+		if (!asyncMessage) {
+			this.asyncMessages.set(key, new AsyncMessage(key));
+		}
+		
+		//. add metrics
+		let total_cnt = 0;
+		this.clients.forEach((c) => total_cnt += c.length)
+		
+		this.emit("createMetrics", null, {
+			org_id: organization_id, 
+			client_cnt: room_clients.length, 
+			total_cnt: total_cnt
+		});
+	}
+	
 	removeClient(socket) {
 		let organization_id = socket.config.orgId
 		let user_id = socket.config.user_id
@@ -78,7 +106,8 @@ class SocketServer extends EventEmitter{
 				this.emit('userStatus', socket, {user_id, status: 'off', organization_id});
 			
 			this.emit("removeMetrics", null, { org_id: organization_id });
-			// this.addAsyncMessage.delete(key);
+
+			this.asyncMessages.delete(key);
 		} else {
 			let total_cnt = 0;
 			this.clients.forEach((c) => total_cnt += c.length)
@@ -91,50 +120,7 @@ class SocketServer extends EventEmitter{
 		}
 		
 	}
-	
-	addClient(socket) {
-		let organization_id = socket.config.orgId
-		let key = socket.config.key
-		let room_clients = this.clients.get(key);
-		if (room_clients) {
-			room_clients.push(socket);
-		} else {
-			room_clients = [socket];
-		}
-		this.clients.set(key, room_clients);
-		this.addAsyncMessage(key)
 		
-		//. add metrics
-		let total_cnt = 0;
-		this.clients.forEach((c) => total_cnt += c.length)
-		
-		this.emit("createMetrics", null, {
-			org_id: organization_id, 
-			client_cnt: room_clients.length, 
-			total_cnt: total_cnt
-		});
-	}
-	
-	addAsyncMessage(key) {
-		let asyncMessage = this.asyncMessages.get(key)
-		if (!asyncMessage) {
-			this.asyncMessages.set(key, new AsyncMessage(key));
-		}
-	}
-	
-	getKeyFromUrl(pathname)	{
-		var path = pathname.split("/");
-		var params = {
-			type: null,
-			key: pathname
-		}  
-		if (path.length > 0) {
-			params.type = path[1];
-			params.orgId = path[2]
-		}
-		return params
-	}
-	
 	async onMessage(req, socket, message) {
 		try {
 			const organization_id = socket.config.orgId
@@ -274,6 +260,27 @@ class SocketServer extends EventEmitter{
 			this.recordTransfer('out', responseData, socket.config.orgId)
 
 	}
+
+	// addAsyncMessage(key) {
+	// 	let asyncMessage = this.asyncMessages.get(key)
+	// 	if (!asyncMessage) {
+	// 		this.asyncMessages.set(key, new AsyncMessage(key));
+	// 	}
+	// }
+	
+	getKeyFromUrl(pathname)	{
+		var path = pathname.split("/");
+		var params = {
+			type: null,
+			key: pathname
+		}  
+		if (path.length > 0) {
+			params.type = path[1];
+			params.orgId = path[2]
+		}
+		return params
+	}
+
 		
 	sendBinary(socket, data, orgId) {
 		socket.send(data, {binary: true});
