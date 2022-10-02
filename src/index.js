@@ -126,7 +126,7 @@ class SocketServer extends EventEmitter{
 			const organization_id = socket.config.orgId
 			this.recordTransfer('in', message, organization_id)
 			
-			// ToDo remove
+			// ToDo: remove
 			if (message instanceof Buffer) {
 				this.emit('importFile2DB', socket, message);
 				console.log('importFile2DB', socket, message);
