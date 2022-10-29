@@ -160,7 +160,8 @@ class SocketServer extends EventEmitter{
 				//. checking async status....				
 				if (requestData.data.async == true) {
 					console.log('async true')
-					const uuid = CoCreateUUID.generate(), asyncMessage = this.asyncMessages.get(socket.config.key);
+					const uuid = CoCreateUUID.generate()
+					const asyncMessage = this.asyncMessages.get(socket.config.key);
 					socket.config.asyncId = uuid;
 					if (asyncMessage) {
 						asyncMessage.defineMessage(uuid);
@@ -178,7 +179,7 @@ class SocketServer extends EventEmitter{
 		const self = this;
 		const responseData = JSON.stringify({
 			module: messageName,
-			data: data
+			data
 		});
 
 		const asyncId = socket.config.asyncId
