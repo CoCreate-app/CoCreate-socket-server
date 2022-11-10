@@ -143,9 +143,8 @@ class SocketServer extends EventEmitter{
 				if (user_id) {
 					if (!socket.config.user_id ) {
 						socket.config.user_id = user_id
-
-					this.emit('userStatus', socket, {user_id, userStatus: 'on', organization_id});
 					}
+					this.emit('userStatus', socket, {user_id, userStatus: 'on', organization_id});
 				}
 
 				//. check permission
