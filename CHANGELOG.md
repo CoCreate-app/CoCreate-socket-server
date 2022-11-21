@@ -1,3 +1,10 @@
+## [1.4.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.4...v1.4.5) (2022-11-21)
+
+
+### Bug Fixes
+
+* replaced document_id with document._id ([d31acd6](https://github.com/CoCreate-app/CoCreate-socket-server/commit/d31acd65e8ce15bcc82d52c74484d694885149eb))
+
 ## [1.4.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.3...v1.4.4) (2022-11-21)
 
 
