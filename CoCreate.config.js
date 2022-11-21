@@ -10,7 +10,7 @@ module.exports = {
             "collection": "files",
             "document_id": "6204254580b409001727b744",
             "key": "src",
-            "data": {
+            "document": {
                 "name": "index.html",
                 "path": "/docs/socket-server/index.html",
                 "domains": [
