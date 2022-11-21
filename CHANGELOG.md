@@ -1,3 +1,12 @@
+## [1.4.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.2...v1.4.3) (2022-11-21)
+
+
+### Bug Fixes
+
+* bump [@cocreate](https://github.com/cocreate) dependencies ([fc63f1a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/fc63f1a7474206a12cc4450eeaee869c43ee8d11))
+* emit userStatus was in wrong location preventing it from firing ([3978852](https://github.com/CoCreate-app/CoCreate-socket-server/commit/3978852bdee59ca1f2d7913bb8ad4961c83c4f35))
+* status renamed to userStatus ([7400b16](https://github.com/CoCreate-app/CoCreate-socket-server/commit/7400b160d3779e8b56fe8f8a72e4dab58ba97052))
+
 ## [1.4.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.1...v1.4.2) (2022-10-01)
 
 
