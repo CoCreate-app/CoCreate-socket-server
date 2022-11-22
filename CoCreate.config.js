@@ -1,5 +1,5 @@
 module.exports = {
-    config: {
+    "config": {
         "apiKey": "2061acef-0451-4545-f754-60cf8160",
         "organization_id": "5ff747727005da1c272740ab",
         "host": "general.cocreate.app"
@@ -8,11 +8,11 @@ module.exports = {
         {
             "entry": "./docs/index.html",
             "collection": "files",
-            "document_id": "6204254580b409001727b744",
-            "key": "src",
             "document": {
+                "_id": "6204254580b409001727b744",
                 "name": "index.html",
                 "path": "/docs/socket-server/index.html",
+                "src": "{{source}}",
                 "domains": [
                     "*",
                     "general.cocreate.app"
