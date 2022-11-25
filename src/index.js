@@ -207,7 +207,7 @@ class SocketServer extends EventEmitter{
 
 				if (clients) {
 					clients.forEach((client) => {
-						if (socket != client || socket == client && data.broadcastSender != false) {
+						if (socket != client  && data.broadcast != false || socket == client && data.broadcastSender != false) {
 							if (isAsync) {
 								asyncData.push({socket: client, message: responseData})
 							} else {
@@ -223,7 +223,7 @@ class SocketServer extends EventEmitter{
 			this.clients.forEach((value, key) => {
 				if (key.includes(url)) {
 					value.forEach(client => {
-						if (socket != client || socket == client && data.broadcastSender != false) {
+						if (socket != client  && data.broadcast != false || socket == client && data.broadcastSender != false) {
 							if (isAsync) {
 								asyncData.push({socket: client, message: responseData})
 							} else {
