@@ -135,7 +135,7 @@ class SocketServer extends EventEmitter{
 			
 			const requestData = JSON.parse(message)
 
-			if (requestData.module) {
+			if (requestData.action) {
 				let user_id = null;
 				if (this.authInstance) {
 					user_id = await this.authInstance.getUserId(req);
@@ -149,7 +149,7 @@ class SocketServer extends EventEmitter{
 
 				//. check permission
 				if (this.permissionInstance) {
-					let passStatus = await this.permissionInstance.check(requestData.module, requestData.data, req, user_id)
+					let passStatus = await this.permissionInstance.check(requestData.action, requestData.data, req, user_id)
 					if (!passStatus) {
 						this.send(socket, 'permissionError', requestData.data)
 						return;
@@ -165,7 +165,7 @@ class SocketServer extends EventEmitter{
 						asyncMessage.defineMessage(socket.config.asyncId);
 					}
 				}
-				this.emit(requestData.module, socket, requestData.data);
+				this.emit(requestData.action, socket, requestData.data);
 			}
 			
 		} catch(e) {
@@ -173,12 +173,12 @@ class SocketServer extends EventEmitter{
 		}
 	}
 	
-	broadcast(socket, messageName, data) {
+	broadcast(socket, action, data) {
 		const self = this;
 		if (!data.uid)
 			data.uid = uid.generate()
 		const responseData = JSON.stringify({
-			module: messageName,
+			action,
 			data
 		});
 
@@ -244,10 +244,10 @@ class SocketServer extends EventEmitter{
 		
 	}
 	
-	send(socket, messageName, data){
+	send(socket, action, data){
 		const asyncId = socket.config.asyncId
 		let responseData = JSON.stringify({
-			module: messageName,
+			action,
 			data
 		});
 
