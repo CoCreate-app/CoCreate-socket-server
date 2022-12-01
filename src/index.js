@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const url = require("url");
 const EventEmitter = require("events").EventEmitter;
 const AsyncMessage = require("./AsyncMessage")
-const CoCreateUUID = require('@cocreate/uuid')
+const uid = require('@cocreate/uuid')
 
 class SocketServer extends EventEmitter{
 	constructor(prefix) {
@@ -159,11 +159,10 @@ class SocketServer extends EventEmitter{
 				//. checking async status....				
 				if (requestData.data.async == true) {
 					console.log('async true')
-					const uuid = CoCreateUUID.generate()
 					const asyncMessage = this.asyncMessages.get(socket.config.key);
-					socket.config.asyncId = uuid;
+					socket.config.asyncId = uid.generate();
 					if (asyncMessage) {
-						asyncMessage.defineMessage(uuid);
+						asyncMessage.defineMessage(socket.config.asyncId);
 					}
 				}
 				this.emit(requestData.module, socket, requestData.data);
@@ -176,6 +175,8 @@ class SocketServer extends EventEmitter{
 	
 	broadcast(socket, messageName, data) {
 		const self = this;
+		if (!data.uid)
+			data.uid = uid.generate()
 		const responseData = JSON.stringify({
 			module: messageName,
 			data
