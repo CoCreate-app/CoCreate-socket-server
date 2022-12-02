@@ -1,3 +1,12 @@
+## [1.4.16](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.15...v1.4.16) (2022-12-02)
+
+
+### Bug Fixes
+
+* add data.uid if does not exist ([8f82de8](https://github.com/CoCreate-app/CoCreate-socket-server/commit/8f82de806d8fe30f5c59abccfd5e5958a2c14018))
+* bump dependencies ([553a695](https://github.com/CoCreate-app/CoCreate-socket-server/commit/553a69586a368310d5b5e6e1f24b4871ae9c90b0))
+* renamed module to action ([9526e0c](https://github.com/CoCreate-app/CoCreate-socket-server/commit/9526e0c3cabfcabf8945615f978a060e690df09d))
+
 ## [1.4.15](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.14...v1.4.15) (2022-11-28)
 
 
