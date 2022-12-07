@@ -1,3 +1,10 @@
+## [1.4.19](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.18...v1.4.19) (2022-12-07)
+
+
+### Bug Fixes
+
+* organization_id ([37b7b72](https://github.com/CoCreate-app/CoCreate-socket-server/commit/37b7b72918fdd6a28ec04b1b26a1822d2d36e1e3))
+
 ## [1.4.18](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.17...v1.4.18) (2022-12-04)
 
 
