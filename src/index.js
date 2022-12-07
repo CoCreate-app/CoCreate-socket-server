@@ -63,7 +63,7 @@ class SocketServer extends EventEmitter{
 	}
 	
 	addClient(socket) {
-		let organization_id = socket.config.orgId
+		let organization_id = socket.config.organization_id
 		let key = socket.config.key
 		let room_clients = this.clients.get(key);
 		if (room_clients) {
@@ -84,14 +84,14 @@ class SocketServer extends EventEmitter{
 		this.clients.forEach((c) => total_cnt += c.length)
 		
 		this.emit("createMetrics", null, {
-			org_id: organization_id, 
+			organization_id, 
 			client_cnt: room_clients.length, 
 			total_cnt: total_cnt
 		});
 	}
 	
 	removeClient(socket) {
-		let organization_id = socket.config.orgId
+		let organization_id = socket.config.organization_id
 		let user_id = socket.config.user_id
 		let key = socket.config.key
 		let room_clients = this.clients.get(key)
@@ -105,7 +105,7 @@ class SocketServer extends EventEmitter{
 			if (user_id)
 				this.emit('userStatus', socket, {user_id, status: 'off', organization_id});
 			
-			this.emit("removeMetrics", null, { org_id: organization_id });
+			this.emit("removeMetrics", null, { organization_id });
 
 			this.asyncMessages.delete(key);
 		} else {
@@ -113,7 +113,7 @@ class SocketServer extends EventEmitter{
 			this.clients.forEach((c) => total_cnt += c.length)
 			
 			this.emit("changeCountMetrics", null, {
-				org_id: organization_id, 
+				organization_id, 
 				total_cnt, 
 				client_cnt: room_clients.length
 			});
@@ -123,23 +123,33 @@ class SocketServer extends EventEmitter{
 		
 	async onMessage(req, socket, message) {
 		try {
-			const organization_id = socket.config.orgId
-			this.recordTransfer('in', message, organization_id)
+			const organization_id = socket.config.organization_id
 			
 			// ToDo: remove
-			if (message instanceof Buffer) {
-				this.emit('importFile2DB', socket, message);
-				console.log('importFile2DB', socket, message);
-				return;
-			}
+			// if (message instanceof Buffer) {
+			// 	this.emit('importFile2DB', socket, message);
+			// 	console.log('importFile2DB', socket, message);
+			// 	return;
+			// }
 			
 			const requestData = JSON.parse(message)
 
 			if (requestData.action) {
+				this.recordTransfer('in', message, organization_id)
+
 				let user_id = null;
-				if (this.authInstance) {
+				if (this.authInstance)
 					user_id = await this.authInstance.getUserId(req);
+				
+				//. check permission
+				if (this.permissionInstance) {
+					const passStatus = await this.permissionInstance.check(requestData.action, requestData.data, req, user_id)
+					if (passStatus !== true) {
+						this.send(socket, 'Access Denied', passStatus)
+						return;
+					}
 				}
+
 				if (user_id) {
 					if (!socket.config.user_id ) {
 						socket.config.user_id = user_id
@@ -147,15 +157,6 @@ class SocketServer extends EventEmitter{
 					this.emit('userStatus', socket, {user_id, userStatus: 'on', organization_id});
 				}
 
-				//. check permission
-				if (this.permissionInstance) {
-					let passStatus = await this.permissionInstance.check(requestData.action, requestData.data, req, user_id)
-					if (!passStatus) {
-						this.send(socket, 'permissionError', requestData.data)
-						return;
-					}
-				}
-				
 				//. checking async status....				
 				if (requestData.data.async == true) {
 					console.log('async true')
@@ -165,6 +166,7 @@ class SocketServer extends EventEmitter{
 						asyncMessage.defineMessage(socket.config.asyncId);
 					}
 				}
+
 				this.emit(requestData.action, socket, requestData.data);
 			}
 			
@@ -189,7 +191,7 @@ class SocketServer extends EventEmitter{
 			isAsync = true;	
 		}
 
-		let organization_id = socket.config.orgId;
+		let organization_id = socket.config.organization_id;
 	    let url = `/${this.prefix}/${organization_id}`;
 		
 		let namespace = data.namespace;
@@ -257,8 +259,8 @@ class SocketServer extends EventEmitter{
 			socket.send(responseData);
 		}
 
-		if (socket.config && socket.config.orgId)
-			this.recordTransfer('out', responseData, socket.config.orgId)
+		if (socket.config && socket.config.organization_id)
+			this.recordTransfer('out', responseData, socket.config.organization_id)
 
 	}
 
@@ -277,22 +279,22 @@ class SocketServer extends EventEmitter{
 		}  
 		if (path.length > 0) {
 			params.type = path[1];
-			params.orgId = path[2]
+			params.organization_id = path[2]
 		}
 		return params
 	}
 
 		
-	sendBinary(socket, data, orgId) {
+	sendBinary(socket, data, organization_id) {
 		socket.send(data, {binary: true});
-		this.recordTransfer('out', data, orgId)
+		this.recordTransfer('out', data, organization_id)
 	}
 	
-	recordTransfer(type, data, org_id) {
+	recordTransfer(type, data, organization_id) {
 		this.emit("setBandwidth", null, {
 			type, 
 			data, 
-			org_id
+			organization_id
 		});
 		
 		// let date = new Date();
@@ -306,8 +308,8 @@ class SocketServer extends EventEmitter{
 		// 	size = Buffer.byteLength(data, 'utf8');
 		// }
 		
-		// if (size > 0 && orgId) {
-		// 	console.log (`${orgId}  ----  ${type} \t ${date.toISOString()} \t ${size}`);
+		// if (size > 0 && organization_id) {
+		// 	console.log (`${organization_id}  ----  ${type} \t ${date.toISOString()} \t ${size}`);
 		// }
 	}
 }
