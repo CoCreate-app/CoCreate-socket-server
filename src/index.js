@@ -147,7 +147,7 @@ class SocketServer extends EventEmitter{
 					if (passStatus !== true) {
 						// if (action == 'syncServer' && passStatus.database === true)
 						// if (action == 'syncServer')
-						// 	this.emit(action, socket, data);
+						// 	this.emit('createDocument', socket, data);
 						// else
 							this.send(socket, 'Access Denied', passStatus)
 						return;
