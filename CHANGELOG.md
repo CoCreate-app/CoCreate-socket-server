@@ -1,3 +1,10 @@
+## [1.4.20](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.19...v1.4.20) (2022-12-07)
+
+
+### Bug Fixes
+
+* comment syncServer requires security improvements ([60f73de](https://github.com/CoCreate-app/CoCreate-socket-server/commit/60f73ded3927f7c6a5005b0f339e846ead920c2e))
+
 ## [1.4.19](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.18...v1.4.19) (2022-12-07)
 
 
