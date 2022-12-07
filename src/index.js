@@ -132,9 +132,9 @@ class SocketServer extends EventEmitter{
 			// 	return;
 			// }
 			
-			const requestData = JSON.parse(message)
+			const {action, data} = JSON.parse(message)
 
-			if (requestData.action) {
+			if (action) {
 				this.recordTransfer('in', message, organization_id)
 
 				let user_id = null;
@@ -143,9 +143,13 @@ class SocketServer extends EventEmitter{
 				
 				//. check permission
 				if (this.permissionInstance) {
-					const passStatus = await this.permissionInstance.check(requestData.action, requestData.data, req, user_id)
+					const passStatus = await this.permissionInstance.check(action, data, req, user_id)
 					if (passStatus !== true) {
-						this.send(socket, 'Access Denied', passStatus)
+						// if (action == 'syncServer' && passStatus.database === true)
+						// if (action == 'syncServer')
+						// 	this.emit(action, socket, data);
+						// else
+							this.send(socket, 'Access Denied', passStatus)
 						return;
 					}
 				}
@@ -158,7 +162,7 @@ class SocketServer extends EventEmitter{
 				}
 
 				//. checking async status....				
-				if (requestData.data.async == true) {
+				if (data.async == true) {
 					console.log('async true')
 					const asyncMessage = this.asyncMessages.get(socket.config.key);
 					socket.config.asyncId = uid.generate();
@@ -167,7 +171,7 @@ class SocketServer extends EventEmitter{
 					}
 				}
 
-				this.emit(requestData.action, socket, requestData.data);
+				this.emit(action, socket, data);
 			}
 			
 		} catch(e) {
