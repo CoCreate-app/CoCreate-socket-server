@@ -300,21 +300,6 @@ class SocketServer extends EventEmitter{
 			data, 
 			organization_id
 		});
-		
-		// let date = new Date();
-		// let size = 0;
-		
-		// type = type || 'in'
-		
-		// if (data instanceof Buffer) {
-		// 	size = data.byteLength;
-		// } else if (data instanceof String || typeof data === 'string') {
-		// 	size = Buffer.byteLength(data, 'utf8');
-		// }
-		
-		// if (size > 0 && organization_id) {
-		// 	console.log (`${organization_id}  ----  ${type} \t ${date.toISOString()} \t ${size}`);
-		// }
 	}
 }
 
