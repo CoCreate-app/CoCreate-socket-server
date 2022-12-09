@@ -1,3 +1,10 @@
+## [1.4.27](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.26...v1.4.27) (2022-12-09)
+
+
+### Bug Fixes
+
+* bump @cocreate/indexdb ([7fe444f](https://github.com/CoCreate-app/CoCreate-socket-server/commit/7fe444f6143fc6ca4c7034e95278fb2d3b07af59))
+
 ## [1.4.26](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.25...v1.4.26) (2022-12-09)
 
 
