@@ -1,3 +1,10 @@
+## [1.4.32](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.31...v1.4.32) (2022-12-20)
+
+
+### Bug Fixes
+
+* bump dependencies ([caa7eec](https://github.com/CoCreate-app/CoCreate-socket-server/commit/caa7eec54b9d8933650d5eea8355d5bcef725f24))
+
 ## [1.4.31](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.30...v1.4.31) (2022-12-13)
 
 
