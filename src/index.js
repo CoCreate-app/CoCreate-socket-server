@@ -64,6 +64,7 @@ class SocketServer extends EventEmitter{
 	
 	addClient(socket) {
 		let organization_id = socket.config.organization_id
+		let user_id = socket.config.user_id
 		let key = socket.config.key
 		let room_clients = this.clients.get(key);
 		if (room_clients) {
@@ -78,7 +79,10 @@ class SocketServer extends EventEmitter{
 		if (!asyncMessage) {
 			this.asyncMessages.set(key, new AsyncMessage(key));
 		}
-		
+
+		if (user_id)
+			this.emit('userStatus', socket, {user_id, userStatus: 'on', organization_id});
+
 		//. add metrics
 		let total_cnt = 0;
 		this.clients.forEach((c) => total_cnt += c.length)
@@ -157,8 +161,8 @@ class SocketServer extends EventEmitter{
 				if (user_id) {
 					if (!socket.config.user_id ) {
 						socket.config.user_id = user_id
+						this.emit('userStatus', socket, {user_id, userStatus: 'on', organization_id});
 					}
-					this.emit('userStatus', socket, {user_id, userStatus: 'on', organization_id});
 				}
 
 				//. checking async status....				
