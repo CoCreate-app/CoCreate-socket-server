@@ -1,6 +1,6 @@
 {
   "name": "@cocreate/socket-server",
-  "version": "1.4.34",
+  "version": "1.4.35",
   "description": "CoCreate-socket-server",
   "keywords": [
     "cocreate-socket",
@@ -20,7 +20,9 @@
     "html5-framework",
     "javascript-framework"
   ],
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./src/index",
   "scripts": {
     "demo": "PORT=5000 node demo/server.js",
@@ -37,6 +39,12 @@
     "url": "https://github.com/CoCreate-app/CoCreate-socket-server/issues"
   },
   "homepage": "https://cocreate.app/docs/CoCreate-socket-server",
-  "dependencies": { "@cocreate/docs": "^1.4.23", "@cocreate/uuid": "^1.2.44" },
-  "devDependencies": { "express": "^4.17.1", "ws": "7.5.9" }
+  "dependencies": {
+    "@cocreate/docs": "^1.4.23",
+    "@cocreate/uuid": "^1.2.44"
+  },
+  "devDependencies": {
+    "express": "^4.17.1",
+    "ws": "7.5.9"
+  }
 }
