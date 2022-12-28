@@ -163,6 +163,8 @@ class SocketServer extends EventEmitter{
 						socket.config.user_id = user_id
 						this.emit('userStatus', socket, {user_id, userStatus: 'on', organization_id});
 					}
+				} else {
+					this.send(socket, 'updateUserStatus', {userStatus: 'off', organization_id})
 				}
 
 				//. checking async status....				
