@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.38...v1.5.0) (2022-12-29)
+
+
+### Bug Fixes
+
+* bump dependencies ([290b588](https://github.com/CoCreate-app/CoCreate-socket-server/commit/290b588c07e1064eaf55d839b285c4994abcdbe6))
+
+
+### Features
+
+* send userStatus off if auth fails ([bfc0252](https://github.com/CoCreate-app/CoCreate-socket-server/commit/bfc0252aacce3ce2b6ee0c138e4d6e3b723e15a3))
+
 ## [1.4.38](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.4.37...v1.4.38) (2022-12-27)
 
 
