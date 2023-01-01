@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.5.2...v1.5.3) (2023-01-01)
+
+
+### Bug Fixes
+
+* docs sanbox overflow ([19e4205](https://github.com/CoCreate-app/CoCreate-socket-server/commit/19e42053e27c4f8107b8f312c5bac807cb76ce60))
+
 ## [1.5.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.5.1...v1.5.2) (2022-12-31)
 
 
