@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.5.3...v1.6.0) (2023-01-02)
+
+
+### Features
+
+* Access Denied returns action, status, and data ([cd98a28](https://github.com/CoCreate-app/CoCreate-socket-server/commit/cd98a287af38567d9a726964e63476d6cd15a90e))
+
 ## [1.5.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.5.2...v1.5.3) (2023-01-01)
 
 
