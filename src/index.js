@@ -153,7 +153,7 @@ class SocketServer extends EventEmitter{
 						// if (action == 'syncServer')
 						// 	this.emit('createDocument', socket, data);
 						// else
-							this.send(socket, 'Access Denied', passStatus)
+							this.send(socket, 'Access Denied', {action, passStatus, data})
 						return;
 					}
 				}
