@@ -37,6 +37,6 @@
     "url": "https://github.com/CoCreate-app/CoCreate-socket-server/issues"
   },
   "homepage": "https://cocreate.app/docs/CoCreate-socket-server",
-  "dependencies": { "@cocreate/docs": "^1.5.8", "@cocreate/uuid": "^1.2.57" },
+  "dependencies": { "@cocreate/docs": "^1.5.9", "@cocreate/uuid": "^1.2.58" },
   "devDependencies": { "express": "^4.17.1", "ws": "7.5.9" }
 }
