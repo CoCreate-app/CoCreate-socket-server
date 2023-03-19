@@ -155,7 +155,8 @@ class SocketServer extends EventEmitter{
 						// else
 							this.send(socket, 'Access Denied', {action, permission, data})
 						return;
-					}
+					} else if (permission.dbs)
+						socket.dbs = permission.dbs
 				}
 
 				if (user_id) {
