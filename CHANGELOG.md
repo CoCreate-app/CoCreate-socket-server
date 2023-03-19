@@ -1,3 +1,11 @@
+# [1.7.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.6.11...v1.7.0) (2023-03-19)
+
+
+### Features
+
+* if permmision returns db urls store in socket instance to allow crud to connect to user defined databases ([8342334](https://github.com/CoCreate-app/CoCreate-socket-server/commit/83423348c070a8985305ebf087ac83d538a6bc80))
+* updated permission to return db urls to connect to 1 or more custom databases ([291fa5f](https://github.com/CoCreate-app/CoCreate-socket-server/commit/291fa5f14c8ef3ab82686935ee232dff413ad51d))
+
 ## [1.6.11](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.6.10...v1.6.11) (2023-02-01)
 
 
