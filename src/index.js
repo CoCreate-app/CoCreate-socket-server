@@ -61,7 +61,7 @@ class SocketServer extends EventEmitter{
 		this.send(socket, 'connect', socket.config.key);
 		
 	}
-	
+
 	addClient(socket) {
 		let organization_id = socket.config.organization_id
 		let user_id = socket.config.user_id
@@ -109,8 +109,9 @@ class SocketServer extends EventEmitter{
 			if (user_id)
 				this.emit('userStatus', socket, {user_id, status: 'off', organization_id});
 			
-			this.emit("removeMetrics", null, { organization_id });
-
+			this.emit("deleteMetrics", null, { organization_id });
+			this.emit("deletePermissions", organization_id );
+			this.emit('disconnect', organization_id)
 			this.asyncMessages.delete(key);
 		} else {
 			let total_cnt = 0;
@@ -155,8 +156,7 @@ class SocketServer extends EventEmitter{
 						// else
 							this.send(socket, 'Access Denied', {action, permission, data})
 						return;
-					} else if (permission.dbs)
-						socket.dbs = permission.dbs
+					} 
 				}
 
 				if (user_id) {
