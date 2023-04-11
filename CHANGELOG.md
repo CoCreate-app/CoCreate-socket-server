@@ -1,3 +1,10 @@
+## [1.7.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.1...v1.7.2) (2023-04-11)
+
+
+### Bug Fixes
+
+* handeling permission error ([325a78a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/325a78a6bb6114b199088dcb8850b3e486e4cea4))
+
 ## [1.7.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.0...v1.7.1) (2023-04-11)
 
 
