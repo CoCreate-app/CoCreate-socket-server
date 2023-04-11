@@ -1,3 +1,11 @@
+## [1.7.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.0...v1.7.1) (2023-04-11)
+
+
+### Bug Fixes
+
+* removed permission.dbs it is now handeled by crud-server ([7dfb781](https://github.com/CoCreate-app/CoCreate-socket-server/commit/7dfb7812cf4ec020d23a5b688134d33abb029d0f))
+* renamed domans to hosts ([6e4c75c](https://github.com/CoCreate-app/CoCreate-socket-server/commit/6e4c75cd2fae0d79950c06b1b919e913fd8b16d9))
+
 # [1.7.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.6.11...v1.7.0) (2023-03-19)
 
 
