@@ -149,7 +149,7 @@ class SocketServer extends EventEmitter{
 				//. check permission
 				if (this.permissionInstance) {
 					const permission = await this.permissionInstance.check(action, data, req, user_id)
-					if (!permission || permission.status === false) {
+					if (!permission || permission.error) {
 						// if (action == 'syncServer' && permission.database === true)
 						// if (action == 'syncServer')
 						// 	this.emit('createDocument', socket, data);
