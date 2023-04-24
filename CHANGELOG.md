@@ -1,3 +1,11 @@
+## [1.7.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.3...v1.7.4) (2023-04-24)
+
+
+### Bug Fixes
+
+* pwa manifest ([2c92143](https://github.com/CoCreate-app/CoCreate-socket-server/commit/2c92143245ebdfd08e349d6fbe3ecdcfa71ce695))
+* updateUserStatus response ([13c1735](https://github.com/CoCreate-app/CoCreate-socket-server/commit/13c1735ca461e129669c9187c75ec3a90443f152))
+
 ## [1.7.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.2...v1.7.3) (2023-04-11)
 
 
