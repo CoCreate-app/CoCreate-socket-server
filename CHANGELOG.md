@@ -1,3 +1,10 @@
+## [1.7.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.4...v1.7.5) (2023-04-24)
+
+
+### Bug Fixes
+
+* node version 16 in build action ([946a52e](https://github.com/CoCreate-app/CoCreate-socket-server/commit/946a52e79afb0af741269f1820ba17d4a3d59b5b))
+
 ## [1.7.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.3...v1.7.4) (2023-04-24)
 
 
