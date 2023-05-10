@@ -147,14 +147,15 @@ class SocketServer extends EventEmitter{
 					user_id = await this.authInstance.getUserId(req);
 				
 				//. check permission
-				if (this.permissionInstance) {
+				if (action !== 'createOrg' && this.permissionInstance) {
+				// if (this.permissionInstance) {
 					const permission = await this.permissionInstance.check(action, data, req, user_id)
 					if (!permission || permission.error) {
 						// if (action == 'syncServer' && permission.database === true)
 						// if (action == 'syncServer')
 						// 	this.emit('createDocument', socket, data);
 						// else
-							this.send(socket, 'Access Denied', {action, permission, data})
+							this.send(socket, 'Access Denied', {action, permission, ...data})
 						return;
 					} 
 				}
@@ -217,8 +218,8 @@ class SocketServer extends EventEmitter{
 			for (let room of rooms) {
 				let url = url;
 				url += `/${room}`;	
+				
 				const clients = this.clients.get(url);
-
 				if (clients) {
 					clients.forEach((client) => {
 						if (socket != client  && data.broadcast != false || socket == client && data.broadcastSender != false) {
