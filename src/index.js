@@ -146,7 +146,6 @@ class SocketServer extends EventEmitter{
 				if (this.authInstance)
 					user_id = await this.authInstance.getUserId(req);
 				
-				//. check permission
 				if (action !== 'createOrg' && this.permissionInstance) {
 				// if (this.permissionInstance) {
 					const permission = await this.permissionInstance.check(action, data, req, user_id)
