@@ -1,3 +1,11 @@
+## [1.7.6](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.5...v1.7.6) (2023-05-10)
+
+
+### Bug Fixes
+
+* apikey renamed to key ([b64597a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/b64597af40ef4c3eb20e7e5e7f902a330db3f9d5))
+* createOrg ([e859b23](https://github.com/CoCreate-app/CoCreate-socket-server/commit/e859b23662e41344defc53e066e4f17570e6e064))
+
 ## [1.7.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.4...v1.7.5) (2023-04-24)
 
 
