@@ -146,16 +146,18 @@ class SocketServer extends EventEmitter{
 				if (this.authInstance)
 					user_id = await this.authInstance.getUserId(req);
 				
-				if (action !== 'createOrg' && this.permissionInstance) {
-				// if (this.permissionInstance) {
+				if (this.permissionInstance) {
 					const permission = await this.permissionInstance.check(action, data, req, user_id)
 					if (!permission || permission.error) {
 						// if (action == 'syncServer' && permission.database === true)
 						// if (action == 'syncServer')
 						// 	this.emit('createDocument', socket, data);
 						// else
-							this.send(socket, 'Access Denied', {action, permission, ...data})
-						return;
+						if (action !== 'createOrg')
+							return this.send(socket, 'Access Denied', {action, permission, ...data})
+						else
+							this.send(socket, 'Access Denied', {action, permission})
+
 					} 
 				}
 
