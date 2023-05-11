@@ -1,3 +1,10 @@
+## [1.7.7](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.6...v1.7.7) (2023-05-11)
+
+
+### Bug Fixes
+
+* Acesss Denied handeling of createOrg ([ca9152c](https://github.com/CoCreate-app/CoCreate-socket-server/commit/ca9152c3792e084fb12f5942772c40c757f30370))
+
 ## [1.7.6](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.5...v1.7.6) (2023-05-10)
 
 
