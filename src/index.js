@@ -153,11 +153,29 @@ class SocketServer extends EventEmitter{
 						// if (action == 'syncServer')
 						// 	this.emit('createDocument', socket, data);
 						// else
-						if (action !== 'createOrg')
-							return this.send(socket, 'Access Denied', {action, permission, ...data})
-						else
-							this.send(socket, 'Access Denied', {action, permission})
+						if (user_id && permission.dbUrl === false && action.includes('Document') && (data.collection == 'organizations' || data.collection == 'users')) {
+							data.database = process.env.organization_id
+							data.organization_id = process.env.organization_id
+							if (data.document) { 
+								if (Array.isArray(data.document) && data.document[0])
+									data.document = data.document[0]
 
+								if (data.collection == 'organizations' && data.document._id !== socket.config.organization_id)
+									return this.send(socket, 'Access Denied', {action, permission, ...data})
+								else if (data.collection == 'users' && data.document._id !== user_id)
+									return this.send(socket, 'Access Denied', {action, permission, ...data})
+							}
+							delete data.filter
+							delete data.document.organization_id
+							if (action == 'updateDocument')
+								data.upsert = false
+						} else if (action === 'createOrg' || action === 'signIn') {
+							this.send(socket, 'Access Denied', {action, permission})
+							data.database = process.env.organization_id
+							data.organization_id = process.env.organization_id
+						} else {
+							return this.send(socket, 'Access Denied', {action, permission, ...data})
+						}
 					} 
 				}
 
