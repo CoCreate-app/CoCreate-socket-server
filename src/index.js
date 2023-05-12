@@ -130,7 +130,7 @@ class SocketServer extends EventEmitter{
 		try {
 			const organization_id = socket.config.organization_id
 			
-			// ToDo: remove
+			// TODO: remove
 			// if (message instanceof Buffer) {
 			// 	this.emit('importFile2DB', socket, message);
 			// 	console.log('importFile2DB', socket, message);
