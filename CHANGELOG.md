@@ -1,3 +1,16 @@
+# [1.8.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.7...v1.8.0) (2023-05-19)
+
+
+### Bug Fixes
+
+* Refactor index.js to remove unused code and improve readability ([8b71373](https://github.com/CoCreate-app/CoCreate-socket-server/commit/8b71373fc453d247389b786530c491754f8104d5))
+* SocketServer class methods and properties ([9dd6f1d](https://github.com/CoCreate-app/CoCreate-socket-server/commit/9dd6f1d25b7bbe6a107d9076db31b73ac8a464b3))
+
+
+### Features
+
+* handle dbUrl false session ([61f64d2](https://github.com/CoCreate-app/CoCreate-socket-server/commit/61f64d2d02327ef3bec2821e8f3f083cc449a753))
+
 ## [1.7.7](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.6...v1.7.7) (2023-05-11)
 
 
