@@ -170,7 +170,6 @@ class SocketServer extends EventEmitter {
                             if (action == 'updateDocument')
                                 data.upsert = false
                         } else if (action === 'createOrganization' || action === 'signIn') {
-                            this.send(socket, 'Access Denied', { action, permission })
                             data.database = process.env.organization_id
                             data.organization_id = process.env.organization_id
                         } else {
