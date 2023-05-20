@@ -153,30 +153,16 @@ class SocketServer extends EventEmitter {
                         // if (action == 'syncServer')
                         // 	this.emit('createDocument', socket, data);
                         // else
-                        if (user_id && permission.dbUrl === false && action.includes('Document') && (data.collection == 'organizations' || data.collection == 'users')) {
+                        if (permission.dbUrl === false) {
                             data.database = process.env.organization_id
                             data.organization_id = process.env.organization_id
-                            if (data.document) {
-                                if (Array.isArray(data.document) && data.document[0])
-                                    data.document = data.document[0]
 
-                                if (data.collection == 'organizations' && data.document._id !== socket.config.organization_id)
-                                    return this.send(socket, 'Access Denied', { action, permission, ...data })
-                                else if (data.collection == 'users' && data.document._id !== user_id)
-                                    return this.send(socket, 'Access Denied', { action, permission, ...data })
+                            const permission2 = await this.permissionInstance.check(action, data, req, user_id)
+                            if (!permission2 || permission2.error) {
+                                return this.send(socket, 'Access Denied', { action, permission2, ...data })
                             }
-                            delete data.filter
-                            delete data.document.organization_id
-                            if (action == 'updateDocument')
-                                data.upsert = false
-                        } else if (action === 'createOrganization' || action === 'signIn') {
-                            data.database = process.env.organization_id
-                            data.organization_id = process.env.organization_id
-                            // TODO: Does user have permission on current host
-                            // or add a filter 
-                        } else {
+                        } else
                             return this.send(socket, 'Access Denied', { action, permission, ...data })
-                        }
                     }
                 }
 
