@@ -1,3 +1,11 @@
+## [1.8.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.8.0...v1.8.1) (2023-05-20)
+
+
+### Bug Fixes
+
+* Refactor socket server code to re check permissions using platformId when organization.dbUrl is false. ([e0cae7a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/e0cae7a0a2eb9c740f36a3306fc038a9c68329ab))
+* updated dependencies to their latest versions ([84d2f1d](https://github.com/CoCreate-app/CoCreate-socket-server/commit/84d2f1d0a67b021682f5b9b543ededb995830231))
+
 # [1.8.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.7.7...v1.8.0) (2023-05-19)
 
 
