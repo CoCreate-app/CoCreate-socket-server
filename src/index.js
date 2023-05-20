@@ -172,6 +172,8 @@ class SocketServer extends EventEmitter {
                         } else if (action === 'createOrganization' || action === 'signIn') {
                             data.database = process.env.organization_id
                             data.organization_id = process.env.organization_id
+                            // TODO: Does user have permission on current host
+                            // or add a filter 
                         } else {
                             return this.send(socket, 'Access Denied', { action, permission, ...data })
                         }
