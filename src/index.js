@@ -87,7 +87,7 @@ class SocketServer extends EventEmitter {
         let total_cnt = 0;
         this.clients.forEach((c) => total_cnt += c.length)
 
-        this.emit("createMetrics", null, {
+        this.emit("createMetrics", {
             organization_id,
             client_cnt: room_clients.length,
             total_cnt: total_cnt
@@ -109,7 +109,7 @@ class SocketServer extends EventEmitter {
             if (user_id)
                 this.emit('userStatus', socket, { user_id, status: 'off', organization_id });
 
-            this.emit("deleteMetrics", null, { organization_id });
+            this.emit("deleteMetrics", { organization_id });
             this.emit("deletePermissions", organization_id);
             this.emit('disconnect', organization_id)
             this.asyncMessages.delete(key);
@@ -117,7 +117,7 @@ class SocketServer extends EventEmitter {
             let total_cnt = 0;
             this.clients.forEach((c) => total_cnt += c.length)
 
-            this.emit("changeCountMetrics", null, {
+            this.emit("changeCountMetrics", {
                 organization_id,
                 total_cnt,
                 client_cnt: room_clients.length
@@ -129,19 +129,14 @@ class SocketServer extends EventEmitter {
     async onMessage(req, socket, message) {
         try {
             const organization_id = socket.config.organization_id
-
-            // TODO: remove
-            // if (message instanceof Buffer) {
-            // 	this.emit('importFile2DB', socket, message);
-            // 	console.log('importFile2DB', socket, message);
-            // 	return;
-            // }
-
             const { action, data } = JSON.parse(message)
 
             if (action) {
-                this.recordTransfer('in', message, organization_id)
-
+                this.emit("setBandwidth", {
+                    type: 'in',
+                    data: message,
+                    organization_id
+                });
                 let user_id = null;
                 if (this.authInstance)
                     user_id = await this.authInstance.getUserId(req);
@@ -149,10 +144,6 @@ class SocketServer extends EventEmitter {
                 if (this.permissionInstance) {
                     const permission = await this.permissionInstance.check(action, data, req, user_id)
                     if (!permission || permission.error) {
-                        // if (action == 'syncServer' && permission.database === true)
-                        // if (action == 'syncServer')
-                        // 	this.emit('createDocument', socket, data);
-                        // else
                         if (permission.dbUrl === false) {
                             data.database = process.env.organization_id
                             data.organization_id = process.env.organization_id
@@ -161,33 +152,39 @@ class SocketServer extends EventEmitter {
                             if (!permission2 || permission2.error) {
                                 return this.send(socket, 'Access Denied', { action, permission2, ...data })
                             }
-                        } else
+                        } else if (!user_id) {
                             return this.send(socket, 'Access Denied', { action, permission, ...data })
-                    }
-                }
+                        }
+                        // dburl is true and db does not have 'keys' collection
+                        // action: syncCollection data{collection: 'keys', document[]}
+                        // actions: add keys as once keys are added admin user can do anything
 
-                if (user_id) {
-                    if (!socket.config.user_id) {
-                        socket.config.user_id = user_id
-                        this.emit('userStatus', socket, { user_id, userStatus: 'on', organization_id });
-                    }
-                } else {
-                    this.send(socket, 'updateUserStatus', { userStatus: 'off', clientId: data.clientId, organization_id })
-                }
 
-                //. checking async status....				
-                if (data.async == true) {
-                    console.log('async true')
-                    const asyncMessage = this.asyncMessages.get(socket.config.key);
-                    socket.config.asyncId = uid.generate();
-                    if (asyncMessage) {
-                        asyncMessage.defineMessage(socket.config.asyncId);
                     }
-                }
 
-                this.emit(action, socket, data);
+                    if (user_id) {
+                        if (!socket.config.user_id) {
+                            socket.config.user_id = user_id
+                            this.emit('userStatus', socket, { user_id, userStatus: 'on', organization_id });
+                        }
+                    } else {
+                        this.send(socket, 'updateUserStatus', { userStatus: 'off', clientId: data.clientId, organization_id })
+                    }
+
+                    //. checking async status....				
+                    if (data.async == true) {
+                        console.log('async true')
+                        const asyncMessage = this.asyncMessages.get(socket.config.key);
+                        socket.config.asyncId = uid.generate();
+                        if (asyncMessage) {
+                            asyncMessage.defineMessage(socket.config.asyncId);
+                        }
+                    }
+
+                    this.emit(action, socket, data);
+
+                }
             }
-
         } catch (e) {
             console.log(e);
         }
@@ -232,9 +229,14 @@ class SocketServer extends EventEmitter {
                             if (isAsync) {
                                 asyncData.push({ socket: client, message: responseData })
                             } else {
+                                // TODO: check permission and remove any items client does not have a permission
                                 client.send(responseData);
                             }
-                            self.recordTransfer('out', responseData, organization_id)
+                            this.emit("setBandwidth", {
+                                type: 'out',
+                                data: responseData,
+                                organization_id
+                            })
                         }
                     })
                 }
@@ -248,9 +250,15 @@ class SocketServer extends EventEmitter {
                             if (isAsync) {
                                 asyncData.push({ socket: client, message: responseData })
                             } else {
+                                // TODO: check permission and remove any items client does not have a permission
                                 client.send(responseData);
                             }
-                            self.recordTransfer('out', responseData, organization_id)
+                            this.emit("setBandwidth", {
+                                type: 'out',
+                                data: responseData,
+                                organization_id
+                            })
+
                         }
                     })
                 }
@@ -274,12 +282,16 @@ class SocketServer extends EventEmitter {
         if (asyncId && socket.config && socket.config.key) {
             this.asyncMessages.get(socket.config.key).setMessage(asyncId, [{ socket, message: responseData }]);
         } else {
+            // TODO: check permission and remove any items client does not have a permission
             socket.send(responseData);
         }
 
         if (socket.config && socket.config.organization_id)
-            this.recordTransfer('out', responseData, socket.config.organization_id)
-
+            this.emit("setBandwidth", {
+                type: 'out',
+                data: responseData,
+                organization_id: socket.config.organization_id
+            })
     }
 
     // addAsyncMessage(key) {
@@ -300,20 +312,6 @@ class SocketServer extends EventEmitter {
             params.organization_id = path[2]
         }
         return params
-    }
-
-
-    sendBinary(socket, data, organization_id) {
-        socket.send(data, { binary: true });
-        this.recordTransfer('out', data, organization_id)
-    }
-
-    recordTransfer(type, data, organization_id) {
-        this.emit("setBandwidth", null, {
-            type,
-            data,
-            organization_id
-        });
     }
 }
 
