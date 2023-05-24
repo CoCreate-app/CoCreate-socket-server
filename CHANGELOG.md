@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.8.2...v1.9.0) (2023-05-24)
+
+
+### Features
+
+* Refactored SocketServer permission checking and added a new function getHost. ([c6a51d1](https://github.com/CoCreate-app/CoCreate-socket-server/commit/c6a51d143fda143aca3d059958bc668f9fac6d04))
+
 ## [1.8.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.8.1...v1.8.2) (2023-05-21)
 
 
