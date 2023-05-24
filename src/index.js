@@ -129,7 +129,7 @@ class SocketServer extends EventEmitter {
     async onMessage(req, socket, message) {
         try {
             const organization_id = socket.config.organization_id
-            const { action, data } = JSON.parse(message)
+            let { action, data } = JSON.parse(message)
 
             if (action) {
                 this.emit("setBandwidth", {
@@ -142,25 +142,31 @@ class SocketServer extends EventEmitter {
                     user_id = await this.authInstance.getUserId(req);
 
                 if (this.permissionInstance) {
-                    const permission = await this.permissionInstance.check(action, data, req, user_id)
-                    if (!permission || permission.error) {
-                        if (permission.dbUrl === false) {
-                            data.database = process.env.organization_id
-                            data.organization_id = process.env.organization_id
+                    data.host = this.getHost(req)
+                    const permission = await this.permissionInstance.check(action, data, user_id)
+                    if (permission.dbUrl === false) {
+                        data.database = process.env.organization_id
+                        data.organization_id = process.env.organization_id
 
-                            const permission2 = await this.permissionInstance.check(action, data, req, user_id)
-                            if (!permission2 || permission2.error) {
-                                return this.send(socket, 'Access Denied', { action, permission2, ...data })
-                            }
-                        } else if (!user_id) {
-                            return this.send(socket, 'Access Denied', { action, permission, ...data })
+                        const permission2 = await this.permissionInstance.check(action, data, req, user_id)
+                        if (!permission2 || permission2.error) {
+                            return this.send(socket, 'Access Denied', { action, permission2, ...data })
                         }
-                        // dburl is true and db does not have 'keys' collection
-                        // action: syncCollection data{collection: 'keys', document[]}
-                        // actions: add keys as once keys are added admin user can do anything
+                    } else if (!permission || permission.error) {
+                        if (!user_id)
+                            this.send(socket, 'updateUserStatus', { userStatus: 'off', clientId: data.clientId, organization_id })
 
-
+                        return this.send(socket, 'Access Denied', { action, permission, ...data })
                     }
+                    // dburl is true and db does not have 'keys' collection
+                    // action: syncCollection data{collection: 'keys', document[]}
+                    // actions: add keys as once keys are added admin user can do anything
+
+
+                    // }
+
+                    if (permission.authorized)
+                        data = permission.authorized
 
                     if (user_id) {
                         if (!socket.config.user_id) {
@@ -191,13 +197,8 @@ class SocketServer extends EventEmitter {
     }
 
     broadcast(socket, action, data) {
-        const self = this;
         if (!data.uid)
             data.uid = uid.generate()
-        const responseData = JSON.stringify({
-            action,
-            data
-        });
 
         const asyncId = socket.config.asyncId
         let isAsync = false;
@@ -214,6 +215,7 @@ class SocketServer extends EventEmitter {
             url += `/${namespace}`
         }
 
+
         let rooms = data.room;
         if (rooms) {
             if (!rooms.isArray())
@@ -222,76 +224,63 @@ class SocketServer extends EventEmitter {
                 let url = url;
                 url += `/${room}`;
 
-                const clients = this.clients.get(url);
-                if (clients) {
-                    clients.forEach((client) => {
-                        if (socket != client && data.broadcast != false || socket == client && data.broadcastSender != false) {
-                            if (isAsync) {
-                                asyncData.push({ socket: client, message: responseData })
-                            } else {
-                                // TODO: check permission and remove any items client does not have a permission
-                                client.send(responseData);
-                            }
-                            this.emit("setBandwidth", {
-                                type: 'out',
-                                data: responseData,
-                                organization_id
-                            })
-                        }
-                    })
-                }
+                this.send(socket, action, data, url, isAsync, asyncData)
             }
-
         } else {
-            this.clients.forEach((value, key) => {
-                if (key.includes(url)) {
-                    value.forEach(client => {
-                        if (socket != client && data.broadcast != false || socket == client && data.broadcastSender != false) {
-                            if (isAsync) {
-                                asyncData.push({ socket: client, message: responseData })
-                            } else {
-                                // TODO: check permission and remove any items client does not have a permission
-                                client.send(responseData);
-                            }
-                            this.emit("setBandwidth", {
-                                type: 'out',
-                                data: responseData,
-                                organization_id
-                            })
-
-                        }
-                    })
-                }
-            })
+            this.send(socket, action, data, url, isAsync, asyncData)
         }
 
-        //. set async processing
         if (isAsync) {
             this.asyncMessages.get(socket.config.key).setMessage(asyncId, asyncData)
         }
 
     }
 
-    send(socket, action, data) {
+    async send(socket, action, data, url, isAsync, asyncData) {
         const asyncId = socket.config.asyncId
-        let responseData = JSON.stringify({
-            action,
-            data
-        });
 
-        if (asyncId && socket.config && socket.config.key) {
+        if (!url && asyncId && socket.config && socket.config.key) {
+            let responseData = JSON.stringify({
+                action,
+                data
+            });
             this.asyncMessages.get(socket.config.key).setMessage(asyncId, [{ socket, message: responseData }]);
         } else {
-            // TODO: check permission and remove any items client does not have a permission
-            socket.send(responseData);
+            let clients
+            if (!url)
+                clients = [socket]
+            else
+                clients = this.clients.get(url);
+
+            if (clients) {
+                for (let client of clients) {
+                    if (socket != client && data.broadcast != false || socket == client && data.broadcastSender != false) {
+                        if (isAsync) {
+                            asyncData.push({ socket, message: JSON.stringify({ action, data }) })
+                        } else {
+                            const permission = await this.permissionInstance.check(action, data, socket.config.user_id)
+                            if (permission && permission.authorized)
+                                data = permission.authorized
+
+                            let responseData = JSON.stringify({
+                                action,
+                                data
+                            });
+
+                            socket.send(responseData);
+
+                            if (socket.config && socket.config.organization_id)
+                                this.emit("setBandwidth", {
+                                    type: 'out',
+                                    data: responseData,
+                                    organization_id: socket.config.organization_id
+                                })
+                        }
+                    }
+                }
+            }
         }
 
-        if (socket.config && socket.config.organization_id)
-            this.emit("setBandwidth", {
-                type: 'out',
-                data: responseData,
-                organization_id: socket.config.organization_id
-            })
     }
 
     // addAsyncMessage(key) {
@@ -313,6 +302,14 @@ class SocketServer extends EventEmitter {
         }
         return params
     }
+
+    getHost(req) {
+        const headers = req['headers']
+        let origin = headers['origin'];
+        if (origin && origin !== 'null')
+            return url.parse(origin).hostname;
+    }
+
 }
 
 
