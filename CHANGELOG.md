@@ -1,3 +1,10 @@
+## [1.10.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.10.1...v1.10.2) (2023-05-25)
+
+
+### Bug Fixes
+
+* Delete AsyncMessage.js as by design the results are async & refactor index.js Emitting; authorized data in send method ([b47e6fc](https://github.com/CoCreate-app/CoCreate-socket-server/commit/b47e6fc0386b4beb25eefba90e74f47e91f949f2))
+
 ## [1.10.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.10.0...v1.10.1) (2023-05-25)
 
 
