@@ -15,16 +15,6 @@ class SocketServer extends EventEmitter {
 
         //. websocket server
         this.wss = new WebSocket.Server({ noServer: true });
-        this.permissionInstance = null;
-        this.authInstance = null;
-    }
-
-    setPermission(instance) {
-        this.permissionInstance = instance;
-    }
-
-    setAuth(instance) {
-        this.authInstance = instance
     }
 
     handleUpgrade(req, socket, head) {
@@ -138,17 +128,17 @@ class SocketServer extends EventEmitter {
                     organization_id
                 });
                 let user_id = null;
-                if (this.authInstance)
-                    user_id = await this.authInstance.getUserId(req);
+                if (this.authenticate)
+                    user_id = await this.authenticate.getUserId(req);
 
-                if (this.permissionInstance) {
+                if (this.authorize) {
                     data.host = this.getHost(req)
-                    const permission = await this.permissionInstance.check(action, data, user_id)
+                    const permission = await this.authorize.check(action, data, user_id)
                     if (permission.dbUrl === false) {
                         data.database = process.env.organization_id
                         data.organization_id = process.env.organization_id
 
-                        const permission2 = await this.permissionInstance.check(action, data, req, user_id)
+                        const permission2 = await this.authorize.check(action, data, req, user_id)
                         if (!permission2 || permission2.error) {
                             return this.send(socket, 'Access Denied', { action, permission2, ...data })
                         }
@@ -258,7 +248,7 @@ class SocketServer extends EventEmitter {
                         if (isAsync) {
                             asyncData.push({ socket, message: JSON.stringify({ action, data }) })
                         } else {
-                            const permission = await this.permissionInstance.check(action, data, socket.config.user_id)
+                            const permission = await this.authorize.check(action, data, socket.config.user_id)
                             if (permission && permission.authorized)
                                 data = permission.authorized
 
