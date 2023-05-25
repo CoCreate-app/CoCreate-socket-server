@@ -1,19 +1,13 @@
 const WebSocket = require('ws');
 const url = require("url");
 const EventEmitter = require("events").EventEmitter;
-const AsyncMessage = require("./AsyncMessage")
 const uid = require('@cocreate/uuid')
 
 class SocketServer extends EventEmitter {
     constructor(prefix) {
         super();
-
         this.clients = new Map();
-        this.asyncMessages = new Map();
-
         this.prefix = prefix || "crud";
-
-        //. websocket server
         this.wss = new WebSocket.Server({ noServer: true });
     }
 
@@ -63,12 +57,6 @@ class SocketServer extends EventEmitter {
             room_clients = [socket];
         }
         this.clients.set(key, room_clients);
-        // this.addAsyncMessage(key)
-
-        let asyncMessage = this.asyncMessages.get(key)
-        if (!asyncMessage) {
-            this.asyncMessages.set(key, new AsyncMessage(key));
-        }
 
         if (user_id)
             this.emit('userStatus', socket, { user_id, userStatus: 'on', organization_id });
@@ -99,10 +87,10 @@ class SocketServer extends EventEmitter {
             if (user_id)
                 this.emit('userStatus', socket, { user_id, status: 'off', organization_id });
 
+            // TODO: remove if no one else connected to organization
             this.emit("deleteMetrics", { organization_id });
             this.emit("deletePermissions", organization_id);
             this.emit('disconnect', organization_id)
-            this.asyncMessages.delete(key);
         } else {
             let total_cnt = 0;
             this.clients.forEach((c) => total_cnt += c.length)
@@ -167,16 +155,6 @@ class SocketServer extends EventEmitter {
                         this.send(socket, 'updateUserStatus', { userStatus: 'off', clientId: data.clientId, organization_id })
                     }
 
-                    //. checking async status....				
-                    if (data.async == true) {
-                        console.log('async true')
-                        const asyncMessage = this.asyncMessages.get(socket.config.key);
-                        socket.config.asyncId = uid.generate();
-                        if (asyncMessage) {
-                            asyncMessage.defineMessage(socket.config.asyncId);
-                        }
-                    }
-
                     this.emit(action, socket, data);
 
                 }
@@ -189,13 +167,6 @@ class SocketServer extends EventEmitter {
     broadcast(socket, action, data) {
         if (!data.uid)
             data.uid = uid.generate()
-
-        const asyncId = socket.config.asyncId
-        let isAsync = false;
-        let asyncData = [];
-        if (asyncId && socket.config && socket.config.key) {
-            isAsync = true;
-        }
 
         let organization_id = socket.config.organization_id;
         let url = `/${this.prefix}/${organization_id}`;
@@ -214,71 +185,45 @@ class SocketServer extends EventEmitter {
                 let url = url;
                 url += `/${room}`;
 
-                this.send(socket, action, data, url, isAsync, asyncData)
+                this.send(socket, action, data, url)
             }
         } else {
-            this.send(socket, action, data, url, isAsync, asyncData)
+            this.send(socket, action, data, url)
         }
-
-        if (isAsync) {
-            this.asyncMessages.get(socket.config.key).setMessage(asyncId, asyncData)
-        }
-
     }
 
-    async send(socket, action, data, url, isAsync, asyncData) {
-        const asyncId = socket.config.asyncId
+    async send(socket, action, data, url) {
+        let clients
+        if (!url)
+            clients = [socket]
+        else
+            clients = this.clients.get(url);
 
-        if (!url && asyncId && socket.config && socket.config.key) {
-            let responseData = JSON.stringify({
-                action,
-                data
-            });
-            this.asyncMessages.get(socket.config.key).setMessage(asyncId, [{ socket, message: responseData }]);
-        } else {
-            let clients
-            if (!url)
-                clients = [socket]
-            else
-                clients = this.clients.get(url);
+        if (clients) {
+            for (let client of clients) {
+                if (socket != client && data.broadcast != false || socket == client && data.broadcastSender != false) {
+                    const permission = await this.authorize.check(action, data, socket.config.user_id)
+                    if (permission && permission.authorized)
+                        data = permission.authorized
 
-            if (clients) {
-                for (let client of clients) {
-                    if (socket != client && data.broadcast != false || socket == client && data.broadcastSender != false) {
-                        if (isAsync) {
-                            asyncData.push({ socket, message: JSON.stringify({ action, data }) })
-                        } else {
-                            const permission = await this.authorize.check(action, data, socket.config.user_id)
-                            if (permission && permission.authorized)
-                                data = permission.authorized
+                    let responseData = JSON.stringify({
+                        action,
+                        data
+                    });
 
-                            let responseData = JSON.stringify({
-                                action,
-                                data
-                            });
+                    socket.send(responseData);
 
-                            socket.send(responseData);
-
-                            if (socket.config && socket.config.organization_id)
-                                this.emit("setBandwidth", {
-                                    type: 'out',
-                                    data: responseData,
-                                    organization_id: socket.config.organization_id
-                                })
-                        }
-                    }
+                    if (socket.config && socket.config.organization_id)
+                        this.emit("setBandwidth", {
+                            type: 'out',
+                            data: responseData,
+                            organization_id: socket.config.organization_id
+                        })
                 }
             }
         }
 
     }
-
-    // addAsyncMessage(key) {
-    // 	let asyncMessage = this.asyncMessages.get(key)
-    // 	if (!asyncMessage) {
-    // 		this.asyncMessages.set(key, new AsyncMessage(key));
-    // 	}
-    // }
 
     getKeyFromUrl(pathname) {
         var path = pathname.split("/");
