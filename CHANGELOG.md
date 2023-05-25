@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.9.0...v1.10.0) (2023-05-25)
+
+
+### Features
+
+* Simplify WebSocketServer Class, Replace Permission and Auth Instance with Single functions. ([4ec6eb3](https://github.com/CoCreate-app/CoCreate-socket-server/commit/4ec6eb35e034a119c3f4e24a054a7708f04e8ac4))
+
 # [1.9.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.8.2...v1.9.0) (2023-05-24)
 
 
