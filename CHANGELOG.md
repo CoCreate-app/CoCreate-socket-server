@@ -1,3 +1,12 @@
+## [1.10.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.10.2...v1.10.3) (2023-06-04)
+
+
+### Bug Fixes
+
+* **semantic-release:** worklow error solved by running node version 14 ([cf66b25](https://github.com/CoCreate-app/CoCreate-socket-server/commit/cf66b252b19f9ff9f92ebd95fe28b999f65a6900))
+* Update dependencies versions for [@cocreate](https://github.com/cocreate) libraries ([724730a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/724730a37f1bd9dce417eb68b55567f37daa7761))
+* workflow test ([92af769](https://github.com/CoCreate-app/CoCreate-socket-server/commit/92af769ebf51cd74605c87d5bdd36668ed7e9e71))
+
 ## [1.10.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.10.1...v1.10.2) (2023-05-25)
 
 
