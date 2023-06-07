@@ -27,7 +27,8 @@
   "scripts": {
     "demo": "PORT=5000 node demo/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "docs": "node ./node_modules/@cocreate/docs/src/index.js"
+    "docs": "node ./node_modules/@cocreate/docs/src/index.js",
+    "postinstall": "node ./node_modules/@cocreate/cli/check-coc.js"
   },
   "repository": {
     "type": "git",
