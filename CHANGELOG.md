@@ -1,3 +1,16 @@
+# [1.11.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.10.4...v1.11.0) (2023-06-07)
+
+
+### Bug Fixes
+
+* Refactor CoCreate.config.js to remove hard-coded credentials ([4c1033a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/4c1033ae66aa16993f3821ee7248394e8aecab1c))
+* workflow ([9594513](https://github.com/CoCreate-app/CoCreate-socket-server/commit/95945133a54d71ee0eb17ffa27ac938795fecc69))
+
+
+### Features
+
+* Refactor WebSocket server constructor and handleUpgrade method ([0caa836](https://github.com/CoCreate-app/CoCreate-socket-server/commit/0caa83606fcb1482b9fd14c5677e32edfc54f4e0))
+
 ## [1.10.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.10.3...v1.10.4) (2023-06-04)
 
 
