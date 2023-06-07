@@ -4,11 +4,16 @@ const EventEmitter = require("events").EventEmitter;
 const uid = require('@cocreate/uuid')
 
 class SocketServer extends EventEmitter {
-    constructor(prefix) {
+    constructor(server, prefix) {
         super();
         this.clients = new Map();
         this.prefix = prefix || "crud";
         this.wss = new WebSocket.Server({ noServer: true });
+        server.on('upgrade', (request, socket, head) => {
+            if (!this.handleUpgrade(request, socket, head)) {
+                socket.destroy();
+            }
+        });
     }
 
     handleUpgrade(req, socket, head) {
