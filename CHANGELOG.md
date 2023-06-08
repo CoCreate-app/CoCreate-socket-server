@@ -1,3 +1,10 @@
+## [1.12.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.12.0...v1.12.1) (2023-06-08)
+
+
+### Bug Fixes
+
+* Update dependencies versions for [@cocreate](https://github.com/cocreate) libraries ([13323e2](https://github.com/CoCreate-app/CoCreate-socket-server/commit/13323e2f09884bc3237d5d1738975be590a1e613))
+
 # [1.12.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.11.0...v1.12.0) (2023-06-08)
 
 
