@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.11.0...v1.12.0) (2023-06-08)
+
+
+### Features
+
+* Add CORS headers to WebSocket server. ([4701892](https://github.com/CoCreate-app/CoCreate-socket-server/commit/47018927d34ef4792ab1c95e0493f3ddefaad11e))
+
 # [1.11.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.10.4...v1.11.0) (2023-06-07)
 
 
