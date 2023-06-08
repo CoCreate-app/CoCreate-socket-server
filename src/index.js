@@ -8,7 +8,12 @@ class SocketServer extends EventEmitter {
         super();
         this.clients = new Map();
         this.prefix = prefix || "crud";
+
         this.wss = new WebSocket.Server({ noServer: true });
+        this.wss.on('headers', (headers, request) => {
+            headers.push('Access-Control-Allow-Origin: *');
+        });
+
         server.on('upgrade', (request, socket, head) => {
             if (!this.handleUpgrade(request, socket, head)) {
                 socket.destroy();
