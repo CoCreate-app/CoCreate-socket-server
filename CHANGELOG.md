@@ -1,3 +1,15 @@
+# [1.13.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.12.1...v1.13.0) (2023-06-10)
+
+
+### Bug Fixes
+
+* Update dependencies versions for [@cocreate](https://github.com/cocreate) libraries ([c5ea592](https://github.com/CoCreate-app/CoCreate-socket-server/commit/c5ea592a82ee5ed079bb51e876e52eadfda8df31))
+
+
+### Features
+
+* Add CLI prompts for "organization_id" and "db" string ([5e2b5ba](https://github.com/CoCreate-app/CoCreate-socket-server/commit/5e2b5babee1a28d084bd60c417d7e3c2b7ecdad0))
+
 ## [1.12.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.12.0...v1.12.1) (2023-06-08)
 
 
