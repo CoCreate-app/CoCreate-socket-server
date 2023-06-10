@@ -1,3 +1,11 @@
+## [1.13.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.13.0...v1.13.1) (2023-06-10)
+
+
+### Bug Fixes
+
+* Refactor authentication method to use token decoding 🚀 ([249cf69](https://github.com/CoCreate-app/CoCreate-socket-server/commit/249cf69c3ce918a2d5bee324456008e1923d8226))
+* Update dependencies versions for [@cocreate](https://github.com/cocreate) libraries ([b7d21f3](https://github.com/CoCreate-app/CoCreate-socket-server/commit/b7d21f334dd160fbad19b4f3539b6adfbfed9861))
+
 # [1.13.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.12.1...v1.13.0) (2023-06-10)
 
 
