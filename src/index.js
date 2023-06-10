@@ -129,7 +129,7 @@ class SocketServer extends EventEmitter {
                 });
                 let user_id = null;
                 if (this.authenticate)
-                    user_id = await this.authenticate.getUserId(req);
+                    user_id = await this.authenticate.decodeToken(req);
 
                 if (this.authorize) {
                     data.host = this.getHost(req)
