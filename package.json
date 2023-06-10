@@ -44,7 +44,7 @@
     "@cocreate/cli": "^1.29.3"
   },
   "dependencies": {
-    "@cocreate/docs": "^1.8.2",
+    "@cocreate/docs": "^1.8.13",
     "@cocreate/uuid": "^1.4.15",
     "ws": "7.5.9"
   }
