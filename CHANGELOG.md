@@ -1,3 +1,10 @@
+## [1.13.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.13.3...v1.13.4) (2023-06-11)
+
+
+### Bug Fixes
+
+* @cocreate/cli moved to dependencies ([0b6f51d](https://github.com/CoCreate-app/CoCreate-socket-server/commit/0b6f51d2b9e58bd96bcee3663de7779a25472f23))
+
 ## [1.13.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.13.2...v1.13.3) (2023-06-11)
 
 
