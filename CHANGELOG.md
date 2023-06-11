@@ -1,3 +1,11 @@
+## [1.13.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.13.1...v1.13.2) (2023-06-11)
+
+
+### Bug Fixes
+
+* renamed db to storage ([4766428](https://github.com/CoCreate-app/CoCreate-socket-server/commit/4766428c38e542282c301c457420dd3405a78206))
+* renamed hosts to host. the value can be a string or an array of strings ([3c60a40](https://github.com/CoCreate-app/CoCreate-socket-server/commit/3c60a40d48dfd9b3343dfa738bb290cc47fb4766))
+
 ## [1.13.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.13.0...v1.13.1) (2023-06-10)
 
 
