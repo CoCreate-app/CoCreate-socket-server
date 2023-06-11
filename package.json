@@ -39,10 +39,8 @@
     "url": "https://github.com/CoCreate-app/CoCreate-socket-server/issues"
   },
   "homepage": "https://cocreate.app/docs/CoCreate-socket-server",
-  "devDependencies": {
-    "@cocreate/cli": "^1.33.0"
-  },
   "dependencies": {
+    "@cocreate/cli": "^1.33.0",
     "@cocreate/uuid": "^1.4.17",
     "ws": "7.5.9"
   }
