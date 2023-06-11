@@ -134,7 +134,7 @@ class SocketServer extends EventEmitter {
                 if (this.authorize) {
                     data.host = this.getHost(req)
                     const permission = await this.authorize.check(action, data, user_id)
-                    if (permission.dbUrl === false) {
+                    if (permission.storage === false) {
                         data.database = process.env.organization_id
                         data.organization_id = process.env.organization_id
 
