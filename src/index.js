@@ -2,14 +2,14 @@ const WebSocket = require('ws');
 const url = require("url");
 const EventEmitter = require("events").EventEmitter;
 const uid = require('@cocreate/uuid')
-const { config } = require('@cocreate/cli')
+const config = require('@cocreate/config')
 
 class SocketServer extends EventEmitter {
     constructor(server, prefix) {
         super();
         this.clients = new Map();
         this.prefix = prefix || "crud";
-        config({ key: 'organization_id', prompt: 'Enter your organization_id: ' })
+        config({ organization_id: { prompt: 'Enter your organization_id: ' } })
 
         this.wss = new WebSocket.Server({ noServer: true });
         this.wss.on('headers', (headers, request) => {
