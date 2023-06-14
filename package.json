@@ -41,7 +41,7 @@
   "homepage": "https://cocreate.app/docs/CoCreate-socket-server",
   "dependencies": {
     "@cocreate/cli": "^1.34.0",
-    "@cocreate/config": "^1.0.0",
+    "@cocreate/config": "^1.0.1",
     "@cocreate/uuid": "^1.4.27",
     "ws": "7.5.9"
   }
