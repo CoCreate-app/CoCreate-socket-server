@@ -40,8 +40,8 @@
   },
   "homepage": "https://cocreate.app/docs/CoCreate-socket-server",
   "dependencies": {
-    "@cocreate/config": "^1.0.2",
-    "@cocreate/uuid": "^1.4.27",
+    "@cocreate/config": "^1.0.3",
+    "@cocreate/uuid": "^1.4.28",
     "ws": "7.5.9"
   }
 }
