@@ -54,7 +54,7 @@ class SocketServer extends EventEmitter {
             self.removeClient(socket)
         });
 
-        this.send(socket, 'connect', socket.config.key);
+        this.send(socket, { method: 'connect', connectedKey: socket.config.key });
 
     }
 
@@ -119,9 +119,9 @@ class SocketServer extends EventEmitter {
     async onMessage(req, socket, message) {
         try {
             const organization_id = socket.config.organization_id
-            let { action, data } = JSON.parse(message)
+            let data = JSON.parse(message)
 
-            if (action) {
+            if (data.method) {
                 this.emit("setBandwidth", {
                     type: 'in',
                     data: message,
@@ -133,23 +133,23 @@ class SocketServer extends EventEmitter {
 
                 if (this.authorize) {
                     data.host = this.getHost(req)
-                    const permission = await this.authorize.check(action, data, user_id)
+                    const permission = await this.authorize.check(data, user_id)
                     if (permission.storage === false) {
                         data.database = process.env.organization_id
                         data.organization_id = process.env.organization_id
 
-                        const permission2 = await this.authorize.check(action, data, req, user_id)
+                        const permission2 = await this.authorize.check(data, req, user_id)
                         if (!permission2 || permission2.error) {
-                            return this.send(socket, 'Access Denied', { action, permission2, ...data })
+                            return this.send(socket, { method: 'Access Denied', permission2, ...data })
                         }
                     } else if (!permission || permission.error) {
                         if (!user_id)
-                            this.send(socket, 'updateUserStatus', { userStatus: 'off', clientId: data.clientId, organization_id })
+                            this.send(socket, { method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
 
-                        return this.send(socket, 'Access Denied', { action, permission, ...data })
+                        return this.send(socket, { method: 'Access Denied', permission, ...data })
                     }
-                    // dburl is true and db does not have 'keys' collection
-                    // action: syncCollection data{collection: 'keys', document[]}
+                    // dburl is true and db does not have 'keys' array
+                    // action: syncCollection data{array: 'keys', object[]}
                     // actions: add keys as once keys are added admin user can do anything
 
 
@@ -161,13 +161,13 @@ class SocketServer extends EventEmitter {
                     if (user_id) {
                         if (!socket.config.user_id) {
                             socket.config.user_id = user_id
-                            this.emit('userStatus', socket, { user_id, userStatus: 'on', organization_id });
+                            this.emit('userStatus', socket, { method: 'userStatus', user_id, userStatus: 'on', organization_id });
                         }
                     } else {
-                        this.send(socket, 'updateUserStatus', { userStatus: 'off', clientId: data.clientId, organization_id })
+                        this.send(socket, { method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
                     }
 
-                    this.emit(action, socket, data);
+                    this.emit(data.method, socket, data);
 
                 }
             }
@@ -176,7 +176,7 @@ class SocketServer extends EventEmitter {
         }
     }
 
-    broadcast(socket, action, data) {
+    broadcast(socket, data) {
         if (!data.uid)
             data.uid = uid.generate()
 
@@ -197,14 +197,14 @@ class SocketServer extends EventEmitter {
                 let url = url;
                 url += `/${room}`;
 
-                this.send(socket, action, data, url)
+                this.send(socket, data, url)
             }
         } else {
-            this.send(socket, action, data, url)
+            this.send(socket, data, url)
         }
     }
 
-    async send(socket, action, data, url) {
+    async send(socket, data, url) {
         let clients
         if (!url)
             clients = [socket]
@@ -214,14 +214,11 @@ class SocketServer extends EventEmitter {
         if (clients) {
             for (let client of clients) {
                 if (socket != client && data.broadcast != false || socket == client && data.broadcastSender != false) {
-                    const permission = await this.authorize.check(action, data, socket.config.user_id)
+                    const permission = await this.authorize.check(data, socket.config.user_id)
                     if (permission && permission.authorized)
                         data = permission.authorized
 
-                    let responseData = JSON.stringify({
-                        action,
-                        data
-                    });
+                    let responseData = JSON.stringify(data);
 
                     socket.send(responseData);
 
