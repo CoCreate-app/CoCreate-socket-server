@@ -1,3 +1,16 @@
+# [1.14.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.13.19...v1.14.0) (2023-08-16)
+
+
+### Bug Fixes
+
+* crud attributes renamed ([e17e290](https://github.com/CoCreate-app/CoCreate-socket-server/commit/e17e290df4500495f070a93e69ffaafe4f1639f8))
+* Refactored *-target to *-selector ([6716c50](https://github.com/CoCreate-app/CoCreate-socket-server/commit/6716c5011ff3b78445bac13c7337bd49f35cc71c))
+
+
+### Features
+
+* name attribute and variable renamed to key ([ac1e91e](https://github.com/CoCreate-app/CoCreate-socket-server/commit/ac1e91e595b8a52c869bb34e629843cff22fa979))
+
 ## [1.13.19](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.13.18...v1.13.19) (2023-06-16)
 
 
