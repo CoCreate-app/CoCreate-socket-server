@@ -62,25 +62,20 @@ class SocketServer extends EventEmitter {
         let organization_id = socket.config.organization_id
         let user_id = socket.config.user_id
         let key = socket.config.key
-        let room_clients = this.clients.get(key);
-        if (room_clients) {
-            room_clients.push(socket);
+        let clients = this.clients.get(key);
+        if (clients) {
+            clients.push(socket);
         } else {
-            room_clients = [socket];
+            clients = [socket];
         }
-        this.clients.set(key, room_clients);
+        this.clients.set(key, clients);
 
         if (user_id)
             this.emit('userStatus', socket, { user_id, userStatus: 'on', organization_id });
 
-        //. add metrics
-        let total_cnt = 0;
-        this.clients.forEach((c) => total_cnt += c.length)
-
         this.emit("createMetrics", {
             organization_id,
-            client_cnt: room_clients.length,
-            total_cnt: total_cnt
+            clients: clients.length,
         });
     }
 
@@ -88,14 +83,14 @@ class SocketServer extends EventEmitter {
         let organization_id = socket.config.organization_id
         let user_id = socket.config.user_id
         let key = socket.config.key
-        let room_clients = this.clients.get(key)
-        const index = room_clients.indexOf(socket);
+        let clients = this.clients.get(key)
+        const index = clients.indexOf(socket);
 
         if (index > -1) {
-            room_clients.splice(index, 1);
+            clients.splice(index, 1);
         }
 
-        if (room_clients.length == 0) {
+        if (clients.length == 0) {
             if (user_id)
                 this.emit('userStatus', socket, { user_id, status: 'off', organization_id });
 
@@ -104,13 +99,9 @@ class SocketServer extends EventEmitter {
             this.emit("deletePermissions", organization_id);
             this.emit('disconnect', organization_id)
         } else {
-            let total_cnt = 0;
-            this.clients.forEach((c) => total_cnt += c.length)
-
-            this.emit("changeCountMetrics", {
+            this.emit("updateMetrics", {
                 organization_id,
-                total_cnt,
-                client_cnt: room_clients.length
+                clients: clients.length
             });
         }
 
