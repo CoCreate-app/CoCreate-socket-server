@@ -1,3 +1,10 @@
+## [1.16.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.16.0...v1.16.1) (2023-08-21)
+
+
+### Bug Fixes
+
+* bump dependencies ([afb7a51](https://github.com/CoCreate-app/CoCreate-socket-server/commit/afb7a510686dbf052c1dbecff15e86088e802001))
+
 # [1.16.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.15.1...v1.16.0) (2023-08-21)
 
 
