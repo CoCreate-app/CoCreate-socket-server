@@ -1,3 +1,10 @@
+## [1.16.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.16.1...v1.16.2) (2023-08-21)
+
+
+### Bug Fixes
+
+* removed build as no webpack.config exist ([1acd03e](https://github.com/CoCreate-app/CoCreate-socket-server/commit/1acd03e81b43363d1f132e1c98cec814ee31a527))
+
 ## [1.16.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.16.0...v1.16.1) (2023-08-21)
 
 
