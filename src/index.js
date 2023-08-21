@@ -96,7 +96,7 @@ class SocketServer extends EventEmitter {
 
             // TODO: remove if no one else connected to organization
             this.emit("deleteMetrics", { organization_id });
-            this.emit("deletePermissions", organization_id);
+            this.emit("deleteAuthorized", organization_id);
             this.emit('disconnect', organization_id)
         } else {
             this.emit("updateMetrics", {
@@ -124,20 +124,20 @@ class SocketServer extends EventEmitter {
 
                 if (this.authorize) {
                     data.host = this.getHost(req)
-                    const permission = await this.authorize.check(data, user_id)
-                    if (permission.storage === false) {
+                    const authorized = await this.authorize.check(data, user_id)
+                    if (authorized.storage === false) {
                         data.database = process.env.organization_id
                         data.organization_id = process.env.organization_id
 
-                        const permission2 = await this.authorize.check(data, req, user_id)
-                        if (!permission2 || permission2.error) {
-                            return this.send(socket, { method: 'Access Denied', permission2, ...data })
+                        const authorized2 = await this.authorize.check(data, req, user_id)
+                        if (!authorized2 || authorized2.error) {
+                            return this.send(socket, { method: 'Access Denied', authorized2, ...data })
                         }
-                    } else if (!permission || permission.error) {
+                    } else if (!authorized || authorized.error) {
                         if (!user_id)
                             this.send(socket, { method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
 
-                        return this.send(socket, { method: 'Access Denied', permission, ...data })
+                        return this.send(socket, { method: 'Access Denied', authorized, ...data })
                     }
                     // dburl is true and db does not have 'keys' array
                     // action: syncCollection data{array: 'keys', object[]}
@@ -146,8 +146,8 @@ class SocketServer extends EventEmitter {
 
                     // }
 
-                    if (permission.authorized)
-                        data = permission.authorized
+                    if (authorized.authorized)
+                        data = authorized.authorized
 
                     if (user_id) {
                         if (!socket.config.user_id) {
@@ -205,9 +205,9 @@ class SocketServer extends EventEmitter {
         if (clients) {
             for (let client of clients) {
                 if (socket != client && data.broadcast != false || socket == client && data.broadcastSender != false) {
-                    const permission = await this.authorize.check(data, socket.config.user_id)
-                    if (permission && permission.authorized)
-                        data = permission.authorized
+                    const authorized = await this.authorize.check(data, socket.config.user_id)
+                    if (authorized && authorized.authorized)
+                        data = authorized.authorized
 
                     let responseData = JSON.stringify(data);
 
