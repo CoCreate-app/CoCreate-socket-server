@@ -1,3 +1,13 @@
+## [1.15.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.15.0...v1.15.1) (2023-08-21)
+
+
+### Bug Fixes
+
+* /dist/CoCreate.js updated to https://CoCreate.app/dist/CoCreate.js ([2f991c6](https://github.com/CoCreate-app/CoCreate-socket-server/commit/2f991c61acf8ee5fad4f339603bed9cfe3289deb))
+* replace cdn with /dist ([832ec88](https://github.com/CoCreate-app/CoCreate-socket-server/commit/832ec881cbf7b05d909b7ac4ce7eeb6f7fb95e20))
+* update file uploader ([84f1c51](https://github.com/CoCreate-app/CoCreate-socket-server/commit/84f1c51dd32c88619579a86d30ef149408f471e9))
+* update variable name for better readability ([5415c05](https://github.com/CoCreate-app/CoCreate-socket-server/commit/5415c0559000f116a66bc534a89ca3073e8df1b3))
+
 # [1.15.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.14.0...v1.15.0) (2023-08-17)
 
 
