@@ -1,3 +1,10 @@
+## [1.16.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.16.2...v1.16.3) (2023-08-21)
+
+
+### Bug Fixes
+
+* update permission functions and variable to authorize for improved clarity and readability ([19c7415](https://github.com/CoCreate-app/CoCreate-socket-server/commit/19c74155e696886f3daab672489febf6009c2e1a))
+
 ## [1.16.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.16.1...v1.16.2) (2023-08-21)
 
 
