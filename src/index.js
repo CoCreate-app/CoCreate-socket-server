@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const url = require("url");
+const { URL } = require("url");
 const EventEmitter = require("events").EventEmitter;
 const uid = require('@cocreate/uuid')
 const config = require('@cocreate/config')
@@ -7,8 +7,9 @@ const config = require('@cocreate/config')
 class SocketServer extends EventEmitter {
     constructor(server, prefix) {
         super();
+        this.organizations = new Map();
         this.clients = new Map();
-        this.prefix = prefix || "crud";
+        this.prefix = prefix || "ws";
         config({ organization_id: { prompt: 'Enter your organization_id: ' } })
 
         this.wss = new WebSocket.Server({ noServer: true });
@@ -25,10 +26,11 @@ class SocketServer extends EventEmitter {
 
     handleUpgrade(req, socket, head) {
         const self = this;
-        const pathname = url.parse(req.url).pathname;
-        const config = this.getKeyFromUrl(pathname)
+        // const url = new URL(req.url);
+        // const pathname = req.url;
+        const config = this.getKeyFromUrl(req.url)
         if (config.type == this.prefix) {
-            self.wss.handleUpgrade(req, socket, head, function (socket) {
+            this.wss.handleUpgrade(req, socket, head, function (socket) {
                 socket.config = config
                 self.onWebSocket(req, socket);
             })
@@ -60,6 +62,9 @@ class SocketServer extends EventEmitter {
 
     addClient(socket) {
         let organization_id = socket.config.organization_id
+        if (!this.organizations.has(organization_id))
+            this.organizations.set(organization_id, true)
+
         let user_id = socket.config.user_id
         let key = socket.config.key
         let clients = this.clients.get(key);
@@ -72,11 +77,6 @@ class SocketServer extends EventEmitter {
 
         if (user_id)
             this.emit('userStatus', socket, { user_id, userStatus: 'on', organization_id });
-
-        this.emit("createMetrics", {
-            organization_id,
-            clients: clients.length,
-        });
     }
 
     removeClient(socket) {
@@ -90,19 +90,12 @@ class SocketServer extends EventEmitter {
             clients.splice(index, 1);
         }
 
-        if (clients.length == 0) {
-            if (user_id)
-                this.emit('userStatus', socket, { user_id, status: 'off', organization_id });
+        if (user_id)
+            this.emit('userStatus', socket, { user_id, status: 'off', organization_id });
 
-            // TODO: remove if no one else connected to organization
-            this.emit("deleteMetrics", { organization_id });
-            this.emit("deleteAuthorized", organization_id);
+        if (clients.length == 0) {
+            this.organizations.delete(organization_id)
             this.emit('disconnect', organization_id)
-        } else {
-            this.emit("updateMetrics", {
-                organization_id,
-                clients: clients.length
-            });
         }
 
     }
@@ -110,14 +103,20 @@ class SocketServer extends EventEmitter {
     async onMessage(req, socket, message) {
         try {
             const organization_id = socket.config.organization_id
+
+            this.emit("setBandwidth", {
+                type: 'in',
+                data: message,
+                organization_id
+            });
+
+            let active = this.organizations.get(organization_id)
+            if (active === false)
+                return this.send(socket, { method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
+
             let data = JSON.parse(message)
 
             if (data.method) {
-                this.emit("setBandwidth", {
-                    type: 'in',
-                    data: message,
-                    organization_id
-                });
                 let user_id = null;
                 if (this.authenticate)
                     user_id = await this.authenticate.decodeToken(req);
@@ -239,13 +238,14 @@ class SocketServer extends EventEmitter {
     }
 
     getHost(req) {
-        const headers = req['headers']
-        let origin = headers['origin'];
-        if (origin && origin !== 'null')
-            return url.parse(origin).hostname;
+        if (req.headers.origin && req.headers.origin !== 'null') {
+            const url = new URL(req.headers.origin);
+            return url.host;
+        } else if (req.headers.host && req.headers.host !== 'null') {
+            return req.headers.host;
+        }
     }
 
 }
-
 
 module.exports = SocketServer
