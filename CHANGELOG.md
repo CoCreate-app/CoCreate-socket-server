@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.16.3...v1.17.0) (2023-09-07)
+
+
+### Features
+
+* organzations map to store the orgs active status, if the org balance falls bellow 0 false is set resulting in socket and file-server responding with 0 balance  error message ([e06b8b1](https://github.com/CoCreate-app/CoCreate-socket-server/commit/e06b8b173fc24b98b60a9bd24494bb1fceea19cc))
+
 ## [1.16.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.16.2...v1.16.3) (2023-08-21)
 
 
