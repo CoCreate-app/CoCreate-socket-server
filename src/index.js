@@ -210,7 +210,7 @@ class SocketServer extends EventEmitter {
 
                     let responseData = JSON.stringify(data);
 
-                    socket.send(responseData);
+                    client.send(responseData);
 
                     if (socket.config && socket.config.organization_id)
                         this.emit("setBandwidth", {
