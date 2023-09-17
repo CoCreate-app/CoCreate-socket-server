@@ -112,7 +112,7 @@ class SocketServer extends EventEmitter {
 
             let active = this.organizations.get(organization_id)
             if (active === false)
-                return this.send(socket, { method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
+                return this.send({ socket, method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
 
             let data = JSON.parse(message)
 
@@ -132,13 +132,13 @@ class SocketServer extends EventEmitter {
 
                         const authorized2 = await this.authorize.check(data, req, user_id)
                         if (!authorized2 || authorized2.error) {
-                            return this.send(socket, { method: 'Access Denied', authorized2, ...data })
+                            return this.send({ socket, method: 'Access Denied', authorized2, ...data })
                         }
                     } else if (!authorized || authorized.error) {
                         if (!user_id)
-                            this.send(socket, { socket, method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
+                            this.send({ socket, method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
 
-                        return this.send(socket, { method: 'Access Denied', authorized, ...data })
+                        return this.send({ method: 'Access Denied', authorized, ...data })
                     }
                     // dburl is true and db does not have 'keys' array
                     // action: syncCollection data{array: 'keys', object[]}
@@ -153,13 +153,13 @@ class SocketServer extends EventEmitter {
                     if (user_id) {
                         if (!socket.config.user_id) {
                             socket.config.user_id = user_id
-                            this.emit('userStatus', socket, { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
+                            this.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
                         }
                     } else {
-                        this.send(socket, { socket, method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
+                        this.send({ socket, method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
                     }
 
-                    this.emit(data.method, socket, data);
+                    this.emit(data.method, data);
 
                 }
             }
@@ -168,7 +168,7 @@ class SocketServer extends EventEmitter {
         }
     }
 
-    broadcast(socket, data) {
+    broadcast(data) {
         if (!data.uid)
             data.uid = uid.generate()
 
@@ -189,14 +189,17 @@ class SocketServer extends EventEmitter {
                 let url = url;
                 url += `/${room}`;
 
-                this.send(socket, data, url)
+                this.send(data, url)
             }
         } else {
-            this.send(socket, data, url)
+            this.send(data, url)
         }
     }
 
-    async send(socket, data, url) {
+    async send(data, url) {
+        const socket = data.socket
+        delete data.socket
+
         let clients
         if (!url)
             clients = [socket]
@@ -209,7 +212,6 @@ class SocketServer extends EventEmitter {
                     const authorized = await this.authorize.check(data, socket.config.user_id)
                     if (authorized && authorized.authorized)
                         data = authorized.authorized
-                    delete data.socket
                     let responseData = JSON.stringify(data);
                     client.send(responseData);
 
