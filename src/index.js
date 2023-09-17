@@ -68,13 +68,14 @@ class SocketServer extends EventEmitter {
         let user_id = socket.config.user_id
         let key = socket.config.key
         let clients = this.clients.get(key);
-        if (clients) {
-            clients.push(socket);
-        } else {
-            clients = [socket];
+        if (!clients) {
+            clients = new Map();
+            this.clients.set(key, clients);
         }
-        this.clients.set(key, clients);
-
+        if (!clients.has(socket))
+            clients.set(socket, true);
+        else
+            console.log('has client')
         if (user_id)
             this.emit('userStatus', socket, { socket, user_id, userStatus: 'on', organization_id });
     }
@@ -83,18 +84,15 @@ class SocketServer extends EventEmitter {
         let organization_id = socket.config.organization_id
         let user_id = socket.config.user_id
         let key = socket.config.key
-        let clients = this.clients.get(key)
-        const index = clients.indexOf(socket);
-
-        if (index > -1) {
-            clients.splice(index, 1);
-        }
+        let clients = this.clients.get(key);
+        clients.delete(socket);
 
         if (user_id)
             this.emit('userStatus', socket, { socket, user_id, status: 'off', organization_id });
 
-        if (clients.length == 0) {
+        if (clients.size == 0) {
             this.organizations.delete(organization_id)
+            // this.clients.delete(key);
             this.emit('disconnect', organization_id)
         }
 
@@ -138,7 +136,7 @@ class SocketServer extends EventEmitter {
                         if (!user_id)
                             this.send({ socket, method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
 
-                        return this.send({ method: 'Access Denied', authorized, ...data })
+                        return this.send({ socket, method: 'Access Denied', authorized, ...data })
                     }
                     // dburl is true and db does not have 'keys' array
                     // action: syncCollection data{array: 'keys', object[]}
@@ -172,7 +170,7 @@ class SocketServer extends EventEmitter {
         if (!data.uid)
             data.uid = uid.generate()
 
-        let organization_id = socket.config.organization_id;
+        let organization_id = data.socket.config.organization_id;
         let url = `/${this.prefix}/${organization_id}`;
 
         let namespace = data.namespace;
@@ -202,12 +200,12 @@ class SocketServer extends EventEmitter {
 
         let clients
         if (!url)
-            clients = [socket]
+            clients = new Map([[socket, true]])
         else
             clients = this.clients.get(url);
 
         if (clients) {
-            for (let client of clients) {
+            for (let client of clients.keys()) {
                 if (socket != client && data.broadcast != false || socket == client && data.broadcastSender != false) {
                     const authorized = await this.authorize.check(data, socket.config.user_id)
                     if (authorized && authorized.authorized)
