@@ -1,3 +1,16 @@
+# [1.18.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.17.0...v1.18.0) (2023-09-17)
+
+
+### Bug Fixes
+
+* send to client ([efa3954](https://github.com/CoCreate-app/CoCreate-socket-server/commit/efa395477b728b0593c4426cb4d536de7ea76c4a))
+
+
+### Features
+
+* socket referenced in the data object. ([1f19f38](https://github.com/CoCreate-app/CoCreate-socket-server/commit/1f19f38c14b8bfee6556d8bd52ac53aa9d3bf07b))
+* socket referenced in the data object. ([1dbad0d](https://github.com/CoCreate-app/CoCreate-socket-server/commit/1dbad0db9b4ff60c834beb7552f369f94e18368b))
+
 # [1.17.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.16.3...v1.17.0) (2023-09-07)
 
 
