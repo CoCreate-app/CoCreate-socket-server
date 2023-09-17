@@ -56,7 +56,7 @@ class SocketServer extends EventEmitter {
             self.removeClient(socket)
         });
 
-        this.send(socket, { method: 'connect', connectedKey: socket.config.key });
+        this.send(socket, { socket, method: 'connect', connectedKey: socket.config.key });
 
     }
 
@@ -76,7 +76,7 @@ class SocketServer extends EventEmitter {
         this.clients.set(key, clients);
 
         if (user_id)
-            this.emit('userStatus', socket, { user_id, userStatus: 'on', organization_id });
+            this.emit('userStatus', socket, { socket, user_id, userStatus: 'on', organization_id });
     }
 
     removeClient(socket) {
@@ -91,7 +91,7 @@ class SocketServer extends EventEmitter {
         }
 
         if (user_id)
-            this.emit('userStatus', socket, { user_id, status: 'off', organization_id });
+            this.emit('userStatus', socket, { socket, user_id, status: 'off', organization_id });
 
         if (clients.length == 0) {
             this.organizations.delete(organization_id)
@@ -122,6 +122,8 @@ class SocketServer extends EventEmitter {
                     user_id = await this.authenticate.decodeToken(req);
 
                 if (this.authorize) {
+                    data.socket = socket
+
                     data.host = this.getHost(req)
                     const authorized = await this.authorize.check(data, user_id)
                     if (authorized.storage === false) {
@@ -134,7 +136,7 @@ class SocketServer extends EventEmitter {
                         }
                     } else if (!authorized || authorized.error) {
                         if (!user_id)
-                            this.send(socket, { method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
+                            this.send(socket, { socket, method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
 
                         return this.send(socket, { method: 'Access Denied', authorized, ...data })
                     }
@@ -151,10 +153,10 @@ class SocketServer extends EventEmitter {
                     if (user_id) {
                         if (!socket.config.user_id) {
                             socket.config.user_id = user_id
-                            this.emit('userStatus', socket, { method: 'userStatus', user_id, userStatus: 'on', organization_id });
+                            this.emit('userStatus', socket, { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
                         }
                     } else {
-                        this.send(socket, { method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
+                        this.send(socket, { socket, method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
                     }
 
                     this.emit(data.method, socket, data);
@@ -207,9 +209,8 @@ class SocketServer extends EventEmitter {
                     const authorized = await this.authorize.check(data, socket.config.user_id)
                     if (authorized && authorized.authorized)
                         data = authorized.authorized
-
+                    delete data.socket
                     let responseData = JSON.stringify(data);
-
                     client.send(responseData);
 
                     if (socket.config && socket.config.organization_id)
