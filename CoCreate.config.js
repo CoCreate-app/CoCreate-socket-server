@@ -8,16 +8,16 @@ module.exports = {
             "object": {
                 "_id": "6204254580b409001727b744",
                 "name": "index.html",
-                "path": "/docs/socket-server/index.html",
+                "path": "/docs/socket-server",
+                "pathname": "/docs/socket-server/index.html",
                 "src": "{{./docs/index.html}}",
                 "host": [
                     "*",
                     "general.cocreate.app"
                 ],
-                "directory": "/docs/socket-server",
+                "directory": "socket-server",
                 "content-type": "text/html",
-                "public": "true",
-                "website_id": "5ffbceb7f11d2d00103c4535"
+                "public": "true"
             }
         }
     ]
