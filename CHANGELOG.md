@@ -1,3 +1,12 @@
+## [1.18.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.18.0...v1.18.1) (2023-09-18)
+
+
+### Bug Fixes
+
+*  Add path and pathname ([5b5fb7e](https://github.com/CoCreate-app/CoCreate-socket-server/commit/5b5fb7e6d718f916dfdbfc3754cb63c6b1a51c47))
+* Update clients array to use map for improved management of each client ([cff2f2a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/cff2f2ad3d34ac1d7b926180da508c65e5855b37))
+* Update dCoCreate dpendencies to latest versions ([03fa429](https://github.com/CoCreate-app/CoCreate-socket-server/commit/03fa429efc31db9f0ed5aec41dbf5b471475e0ba))
+
 # [1.18.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.17.0...v1.18.0) (2023-09-17)
 
 
