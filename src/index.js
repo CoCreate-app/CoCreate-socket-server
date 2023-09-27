@@ -87,6 +87,7 @@ class SocketServer extends EventEmitter {
         let clients = this.clients.get(key);
         clients.delete(socket);
 
+        // TODO: if clientId has no socketId mark for deleteion. notification will require to know if client is being removed to remove from ts map
         if (user_id)
             this.emit('userStatus', socket, { socket, user_id, status: 'off', organization_id });
 
@@ -134,7 +135,7 @@ class SocketServer extends EventEmitter {
                         }
                     } else if (!authorized || authorized.error) {
                         if (!user_id)
-                            this.send({ socket, method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
+                            this.send({ socket, method: 'updateUserStatus', userStatus: 'off', socketId: data.socketId, organization_id })
 
                         return this.send({ socket, method: 'Access Denied', authorized, ...data })
                     }
@@ -154,7 +155,7 @@ class SocketServer extends EventEmitter {
                             this.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
                         }
                     } else {
-                        this.send({ socket, method: 'updateUserStatus', userStatus: 'off', clientId: data.clientId, organization_id })
+                        this.send({ socket, method: 'updateUserStatus', userStatus: 'off', socketId: data.socketId, organization_id })
                     }
 
                     this.emit(data.method, data);
