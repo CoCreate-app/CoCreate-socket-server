@@ -114,13 +114,17 @@ class SocketServer extends EventEmitter {
                 return this.send({ socket, method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
 
             let data = JSON.parse(message)
-
             if (data.method) {
                 let user_id = null;
                 if (this.authenticate)
                     user_id = await this.authenticate.decodeToken(req);
 
                 if (this.authorize) {
+                    if (data.socketId)
+                        socket.id = data.socketId
+                    if (data.clientId)
+                        socket.clientId = data.clientId
+
                     data.socket = socket
 
                     data.host = this.getHost(req)
