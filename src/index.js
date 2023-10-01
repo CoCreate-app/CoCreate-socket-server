@@ -7,101 +7,182 @@ const config = require('@cocreate/config')
 class SocketServer extends EventEmitter {
     constructor(server, prefix) {
         super();
+        this.prefix = prefix || "ws";
         this.organizations = new Map();
         this.clients = new Map();
-        this.prefix = prefix || "ws";
+        this.sockets = new Map();
+        this.users = new Map();
+
         config({ organization_id: { prompt: 'Enter your organization_id: ' } })
 
         this.wss = new WebSocket.Server({ noServer: true });
+
         this.wss.on('headers', (headers, request) => {
             headers.push('Access-Control-Allow-Origin: *');
         });
 
+        this.wss.on('error', (error) => {
+            socket.destroy();
+        });
+
         server.on('upgrade', (request, socket, head) => {
-            if (!this.handleUpgrade(request, socket, head)) {
-                socket.destroy();
+            const self = this;
+            const config = this.getKeyFromUrl(request.url)
+            if (config.type == this.prefix && config.organization_id) {
+                this.wss.handleUpgrade(request, socket, head, function (socket) {
+                    socket.config = config
+                    socket.organization_id = config.organization_id
+                    socket.origin = request.headers.origin
+                    socket.pathname = request.url
+
+                    if (socket.origin && socket.origin !== 'null') {
+                        const url = new URL(socket.origin);
+                        socket.host = url.host;
+                    }
+
+                    self.onWebSocket(socket);
+                })
             }
         });
     }
 
-    handleUpgrade(req, socket, head) {
+    onWebSocket(socket) {
         const self = this;
-        // const url = new URL(req.url);
-        // const pathname = req.url;
-        const config = this.getKeyFromUrl(req.url)
-        if (config.type == this.prefix) {
-            this.wss.handleUpgrade(req, socket, head, function (socket) {
-                socket.config = config
-                self.onWebSocket(req, socket);
-            })
-            return true;
-        }
-        return false;
-    }
-
-    onWebSocket(req, socket) {
-        const self = this;
-
-        this.addClient(socket);
-
         socket.on('message', async (message) => {
-            self.onMessage(req, socket, message);
+            self.onMessage(socket, message);
         })
 
-        socket.on('close', function () {
-            self.removeClient(socket)
+        socket.on('close', () => {
+            self.delete(socket)
         })
 
         socket.on("error", () => {
-            self.removeClient(socket)
+            self.delete(socket)
         });
 
-        this.send(socket, { socket, method: 'connect', connectedKey: socket.config.key });
+        socket.send(JSON.stringify({ method: 'connect', connectedKey: socket.config.key }))
 
     }
 
-    addClient(socket) {
-        let organization_id = socket.config.organization_id
-        if (!this.organizations.has(organization_id))
-            this.organizations.set(organization_id, true)
+    add(socket) {
+        // TODO: query db for messages from a specified date
+        let organization_id = socket.organization_id
 
-        let user_id = socket.config.user_id
-        let key = socket.config.key
-        let clients = this.clients.get(key);
-        if (!clients) {
-            clients = new Map();
-            this.clients.set(key, clients);
+        let organization = this.organizations.get(organization_id)
+        if (!organization) {
+            organization = {
+                status: true,
+                clients: {}
+            }
+            this.organizations.set(organization_id, organization)
         }
-        if (!clients.has(socket))
-            clients.set(socket, true);
-        else
-            console.log('has client')
-        if (user_id)
-            this.emit('userStatus', socket, { socket, user_id, userStatus: 'on', organization_id });
-    }
 
-    removeClient(socket) {
-        let organization_id = socket.config.organization_id
-        let user_id = socket.config.user_id
-        let key = socket.config.key
-        let clients = this.clients.get(key);
-        clients.delete(socket);
+        if (!this.clients.has(socket.clientId)) {
+            this.clients.set(socket.clientId, []);
+            organization.clients[socket.clientId] = []
+        }
 
-        // TODO: if clientId has no socketId mark for deleteion. notification will require to know if client is being removed to remove from ts map
-        if (user_id)
-            this.emit('userStatus', socket, { socket, user_id, status: 'off', organization_id });
+        if (!this.sockets.has(socket.id)) {
+            this.sockets.set(socket.id, socket);
+            this.clients.get(socket.clientId).push(socket);
+            organization.clients[socket.clientId].push(socket)
+        }
 
-        if (clients.size == 0) {
-            this.organizations.delete(organization_id)
-            // this.clients.delete(key);
-            this.emit('disconnect', organization_id)
+        if (socket.user_id) {
+            this.emit('userStatus', { socket, user_id: socket.user_id, userStatus: 'on', organization_id });
+
+            if (!this.users.has(socket.user_id)) {
+                this.users.set(socket.user_id, [socket])
+            } else {
+                this.users.get(socket.user_id).push(socket)
+            }
         }
 
     }
 
-    async onMessage(req, socket, message) {
+    get(data) {
+        let sockets = []
+        if (data.broadcast !== false) {
+            let clients = this.organizations.get(data.organization_id).clients
+            if (clients) {
+                for (let client of Object.keys(clients)) {
+                    if (data.broadcastSender === false && client === data.clientId) continue
+
+                    if (data.broadcastClient)
+                        sockets.push(clients[client][0])
+                    else
+                        sockets.push(...clients[client])
+                }
+            }
+        } else if (data.broadcastSender) {
+            sockets.push(data.socket)
+        }
+        return sockets
+    }
+
+    delete(socket) {
+        let organization_id = socket.organization_id
+        if (this.organizations.has(organization_id)) {
+            const clients = this.organizations.get(organization_id).clients;
+
+            // Check if the client exists
+            if (clients && clients[socket.clientId]) {
+                const client = clients[socket.clientId]
+
+                // Check if the socket exists in the client's sockets
+                const index = client.findIndex(item => item.id === socket.id);
+                if (index !== -1) {
+                    client.splice(index, 1);
+                }
+
+                // Delete the client if it's empty
+                if (!client.length) {
+                    delete clients[socket.clientId];
+                }
+
+                if (!Object.keys(clients).length) {
+                    this.organizations.delete(socket.organization_id);
+                }
+
+            }
+        }
+
+        if (this.clients.has(socket.clientId)) {
+            const client = this.clients.get(socket.clientId)
+            const index = client.findIndex(item => item.id === socket.id);
+            if (index !== -1) {
+                client.splice(index, 1);
+            }
+
+            if (!client.length) {
+                this.clients.delete(socket.clientId);
+            }
+        }
+
+        if (this.clients.size === 0) {
+            this.organizations.delete(socket.organization_id);
+        }
+
+        this.sockets.delete(socket.id);
+
+        if (socket.user_id) {
+            let sockets = this.users.get(socket.user_id)
+            if (sockets) {
+                const index = sockets.findIndex(item => item.id === socket.id);
+                if (index !== -1) {
+                    sockets.splice(index, 1);
+                }
+                if (!sockets.length) {
+                    this.users.delete(socket.user_id);
+                    this.emit('userStatus', { socket, user_id, status: 'off', organization_id });
+                }
+            }
+        }
+    }
+
+    async onMessage(socket, message) {
         try {
-            const organization_id = socket.config.organization_id
+            const organization_id = socket.organization_id
 
             this.emit("setBandwidth", {
                 type: 'in',
@@ -109,25 +190,34 @@ class SocketServer extends EventEmitter {
                 organization_id
             });
 
-            let active = this.organizations.get(organization_id)
-            if (active === false)
+            if (this.organizations.has(organization_id) && !this.organizations.get(organization_id).status)
                 return this.send({ socket, method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
 
             let data = JSON.parse(message)
             if (data.method) {
                 let user_id = null;
+                console.log('socket.protocol: ', socket.protocol)
                 if (this.authenticate)
-                    user_id = await this.authenticate.decodeToken(req);
+                    user_id = await this.authenticate.decodeToken(socket.protocol);
 
                 if (this.authorize) {
-                    if (data.socketId)
-                        socket.id = data.socketId
-                    if (data.clientId)
-                        socket.clientId = data.clientId
+                    if (!socket.id && data.socketId)
+                        socket.id = data.socketId;
+                    if (!socket.clientId && data.clientId)
+                        socket.clientId = data.clientId;
+                    if (!socket.user_id && user_id) {
+                        socket.user_id = user_id;
+                        this.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
+                    }
+
+                    if (!this.sockets.has(socket.id)) {
+                        this.add(socket);
+                        if (!this.organizations.get(organization_id).status)
+                            return this.send({ socket, method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
+                    }
 
                     data.socket = socket
 
-                    data.host = this.getHost(req)
                     const authorized = await this.authorize.check(data, user_id)
                     if (authorized.storage === false) {
                         data.database = process.env.organization_id
@@ -153,15 +243,6 @@ class SocketServer extends EventEmitter {
                     if (authorized.authorized)
                         data = authorized.authorized
 
-                    if (user_id) {
-                        if (!socket.config.user_id) {
-                            socket.config.user_id = user_id
-                            this.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
-                        }
-                    } else {
-                        this.send({ socket, method: 'updateUserStatus', userStatus: 'off', socketId: data.socketId, organization_id })
-                    }
-
                     this.emit(data.method, data);
 
                 }
@@ -171,63 +252,45 @@ class SocketServer extends EventEmitter {
         }
     }
 
-    broadcast(data) {
+    async send(data) {
+        // const socket = this.sockets.get(data.socketId)
+        const socket = data.socket
+        // TODO: store a list of sent clients so that we can exclude for push notification clients
+
+        const authorized = await this.authorize.check(data, socket.user_id)
+        if (authorized && authorized.authorized)
+            data = authorized.authorized
+
         if (!data.uid)
             data.uid = uid.generate()
 
-        let organization_id = data.socket.config.organization_id;
-        let url = `/${this.prefix}/${organization_id}`;
+        if (!data.method.startsWith('read.') || data.log)
+            this.emit('create.object', {
+                method: 'create.object',
+                array: 'message_log',
+                object: data,
+                organization_id: data.organization_id
+            });
 
-        let namespace = data.namespace;
-        if (namespace) {
-            url += `/${namespace}`
-        }
+        let sockets = this.get(data);
 
-
-        let rooms = data.room;
-        if (rooms) {
-            if (!rooms.isArray())
-                rooms = [rooms]
-            for (let room of rooms) {
-                let url = url;
-                url += `/${room}`;
-
-                this.send(data, url)
-            }
-        } else {
-            this.send(data, url)
-        }
-    }
-
-    async send(data, url) {
-        const socket = data.socket
         delete data.socket
 
-        let clients
-        if (!url)
-            clients = new Map([[socket, true]])
-        else
-            clients = this.clients.get(url);
+        for (let i = 0; i < sockets.length; i++) {
+            const authorized = await this.authorize.check(data, sockets[i].user_id)
+            if (authorized && authorized.authorized)
+                sockets[i].send(JSON.stringify(authorized.authorized));
+            else
+                sockets[i].send(JSON.stringify(data));
 
-        if (clients) {
-            for (let client of clients.keys()) {
-                if (socket != client && data.broadcast != false || socket == client && data.broadcastSender != false) {
-                    const authorized = await this.authorize.check(data, socket.config.user_id)
-                    if (authorized && authorized.authorized)
-                        data = authorized.authorized
-                    let responseData = JSON.stringify(data);
-                    client.send(responseData);
-
-                    if (socket.config && socket.config.organization_id)
-                        this.emit("setBandwidth", {
-                            type: 'out',
-                            data: responseData,
-                            organization_id: socket.config.organization_id
-                        })
-                }
-            }
+            this.emit("setBandwidth", {
+                type: 'out',
+                data: authorized.authorized,
+                organization_id: socket.organization_id
+            })
         }
 
+        // TODO: send message to notification with an array of clientId so that notification can send to subscribed clients that message was not already sent to
     }
 
     getKeyFromUrl(pathname) {
@@ -241,15 +304,6 @@ class SocketServer extends EventEmitter {
             params.organization_id = path[2]
         }
         return params
-    }
-
-    getHost(req) {
-        if (req.headers.origin && req.headers.origin !== 'null') {
-            const url = new URL(req.headers.origin);
-            return url.host;
-        } else if (req.headers.host && req.headers.host !== 'null') {
-            return req.headers.host;
-        }
     }
 
 }
