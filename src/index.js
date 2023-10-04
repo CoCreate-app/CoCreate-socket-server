@@ -2,11 +2,13 @@ const WebSocket = require('ws');
 const { URL } = require("url");
 const EventEmitter = require("events").EventEmitter;
 const uid = require('@cocreate/uuid')
+const { ObjectId } = require('@cocreate/utils')
 const config = require('@cocreate/config')
 
 class SocketServer extends EventEmitter {
     constructor(server, prefix) {
         super();
+        this.serverId = uid.generate(12)
         this.prefix = prefix || "ws";
         this.organizations = new Map();
         this.clients = new Map();
@@ -27,13 +29,21 @@ class SocketServer extends EventEmitter {
 
         server.on('upgrade', (request, socket, head) => {
             const self = this;
-            const config = this.getKeyFromUrl(request.url)
+            const config = this.getConfigFromUrl(request.url)
             if (config.type == this.prefix && config.organization_id) {
                 this.wss.handleUpgrade(request, socket, head, function (socket) {
-                    socket.config = config
                     socket.organization_id = config.organization_id
-                    socket.origin = request.headers.origin
+                    socket.id = config.socketId;
+                    socket.clientId = config.clientId;
+                    socket.origin = request.headers.origin || request.headers.host
+                    if (socket.origin.startsWith('http'))
+                        socket.origin = socket.origin.replace('http', 'ws')
                     socket.pathname = request.url
+                    if (!socket.url) {
+                        const lastSlashIndex = socket.pathname.lastIndexOf('/');
+                        socket.socketUrl = socket.pathname.substring(0, lastSlashIndex);
+                        socket.socketUrl = socket.origin + socket.socketUrl
+                    }
 
                     if (socket.origin && socket.origin !== 'null') {
                         const url = new URL(socket.origin);
@@ -41,6 +51,27 @@ class SocketServer extends EventEmitter {
                     }
 
                     self.onWebSocket(socket);
+
+                    if (config.lastSynced)
+                        this.emit('read.object', {
+                            socket,
+                            method: 'read.object',
+                            array: 'message_log',
+                            filter: {
+                                query: [
+                                    { key: 'dateStored', value: config.lastSynced, operator: '$gt' },
+                                    { key: '_id', value: config.syncedMessages, operator: '$nin' },
+                                    { key: 'dateStored', direction: 'false', operator: '$ne' }
+                                ],
+                                sort: [
+                                    { key: 'broadcast', value: 'desc' }
+                                ]
+                            },
+                            sync: true,
+                            syncedMessages: config.syncedMessages,
+                            organization_id: data.organization_id
+                        });
+
                 })
             }
         });
@@ -48,6 +79,8 @@ class SocketServer extends EventEmitter {
 
     onWebSocket(socket) {
         const self = this;
+        this.add(socket);
+
         socket.on('message', async (message) => {
             self.onMessage(socket, message);
         })
@@ -60,12 +93,11 @@ class SocketServer extends EventEmitter {
             self.delete(socket)
         });
 
-        socket.send(JSON.stringify({ method: 'connect', connectedKey: socket.config.key }))
+        socket.send(JSON.stringify({ method: 'connect', connectedKey: socket.pathname }))
 
     }
 
     add(socket) {
-        // TODO: query db for messages from a specified date
         let organization_id = socket.organization_id
 
         let organization = this.organizations.get(organization_id)
@@ -74,7 +106,23 @@ class SocketServer extends EventEmitter {
                 status: true,
                 clients: {}
             }
+
             this.organizations.set(organization_id, organization)
+
+            this.emit('update.object', {
+                method: 'update.object',
+                array: 'organizations',
+                object: {
+                    _id: organization_id, ['$push.activeHost']: socket.socketUrl // needs socketId
+                },
+                organization_id
+            });
+
+            this.emit('mesh.create', {
+                url: socket.socketUrl,
+                organization_id
+            });
+
         }
 
         if (!this.clients.has(socket.clientId)) {
@@ -103,8 +151,9 @@ class SocketServer extends EventEmitter {
     get(data) {
         let sockets = []
         if (data.broadcast !== false) {
-            let clients = this.organizations.get(data.organization_id).clients
-            if (clients) {
+            let organization = this.organizations.get(data.organization_id)
+            if (organization) {
+                const clients = organization.clients
                 for (let client of Object.keys(clients)) {
                     if (data.broadcastSender === false && client === data.clientId) continue
 
@@ -113,8 +162,11 @@ class SocketServer extends EventEmitter {
                     else
                         sockets.push(...clients[client])
                 }
+            } else {
+                // TODO: requires a messageQueue that expires
+                console.log('organization could not be found', data)
             }
-        } else if (data.broadcastSender) {
+        } else if (data.broadcastSender !== false) {
             sockets.push(data.socket)
         }
         return sockets
@@ -135,13 +187,25 @@ class SocketServer extends EventEmitter {
                     client.splice(index, 1);
                 }
 
-                // Delete the client if it's empty
                 if (!client.length) {
                     delete clients[socket.clientId];
                 }
 
                 if (!Object.keys(clients).length) {
                     this.organizations.delete(socket.organization_id);
+                    this.emit('update.object', {
+                        method: 'update.object',
+                        array: 'organizations',
+                        object: {
+                            _id: organization_id, ['$pull.activeHost']: socket.socketUrl
+                        },
+                        organization_id
+                    });
+
+                    this.emit('mesh.update', {
+                        url: socket.socketUrl,
+                        organization_id
+                    });
                 }
 
             }
@@ -195,23 +259,20 @@ class SocketServer extends EventEmitter {
 
             let data = JSON.parse(message)
             if (data.method) {
+                if (data.method === 'region.added' || data.method === 'region.removed')
+                    console.log('data.method: ', data.method)
                 let user_id = null;
                 console.log('socket.protocol: ', socket.protocol)
                 if (this.authenticate)
                     user_id = await this.authenticate.decodeToken(socket.protocol);
 
                 if (this.authorize) {
-                    if (!socket.id && data.socketId)
-                        socket.id = data.socketId;
-                    if (!socket.clientId && data.clientId)
-                        socket.clientId = data.clientId;
                     if (!socket.user_id && user_id) {
                         socket.user_id = user_id;
                         this.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
                     }
 
                     if (!this.sockets.has(socket.id)) {
-                        this.add(socket);
                         if (!this.organizations.get(organization_id).status)
                             return this.send({ socket, method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
                     }
@@ -253,25 +314,35 @@ class SocketServer extends EventEmitter {
     }
 
     async send(data) {
+        // if (data.syncdata.array === 'message_log' && data.method.startsWith('read.')) {
+        if (data.sync) {
+            for (let i = 0; i < data.object; i++)
+                data.socket.send(data.object[i])
+            return
+        }
+
         // const socket = this.sockets.get(data.socketId)
         const socket = data.socket
-        // TODO: store a list of sent clients so that we can exclude for push notification clients
+        const sent = []
 
         const authorized = await this.authorize.check(data, socket.user_id)
         if (authorized && authorized.authorized)
             data = authorized.authorized
 
-        if (!data.uid)
-            data.uid = uid.generate()
-
-        if (!data.method.startsWith('read.') || data.log)
-            this.emit('create.object', {
-                method: 'create.object',
+        let _id = ObjectId() // could use data.uid and perhaps data.uid should be a document_id
+        if (!data.method.startsWith('read.') || data.log) {
+            let object = { _id, ...data, $currentDate: { dateStored: true } }
+            delete object.socket
+            this.emit('update.object', {
+                method: 'update.object',
                 array: 'message_log',
-                object: data,
+                object,
+                upsert: true,
                 organization_id: data.organization_id
             });
+        }
 
+        data.syncedMessage = _id
         let sockets = this.get(data);
 
         delete data.socket
@@ -282,28 +353,31 @@ class SocketServer extends EventEmitter {
                 sockets[i].send(JSON.stringify(authorized.authorized));
             else
                 sockets[i].send(JSON.stringify(data));
-
+            sent.push(socket.clientId)
             this.emit("setBandwidth", {
                 type: 'out',
-                data: authorized.authorized,
+                data: authorized.authorized || data,
                 organization_id: socket.organization_id
             })
         }
 
-        // TODO: send message to notification with an array of clientId so that notification can send to subscribed clients that message was not already sent to
+        // TODO: sent is an array of clientId's so that notification can send to subscribed clients that are not currently connected
+        this.emit("notification", { sent })
     }
 
-    getKeyFromUrl(pathname) {
-        var path = pathname.split("/");
-        var params = {
-            type: null,
-            key: pathname
+    getConfigFromUrl(pathname) {
+        const path = pathname.split("/");
+        if (path[3]) {
+            path[3] = decodeURIComponent(path[3]);
+            path[3] = JSON.parse(path[3]) || {};
         }
-        if (path.length > 0) {
-            params.type = path[1];
-            params.organization_id = path[2]
+
+        const config = {
+            type: path[1],
+            organization_id: path[2],
+            ...path[3]
         }
-        return params
+        return config
     }
 
 }
