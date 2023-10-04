@@ -316,8 +316,16 @@ class SocketServer extends EventEmitter {
     async send(data) {
         // if (data.syncdata.array === 'message_log' && data.method.startsWith('read.')) {
         if (data.sync) {
+            // TODO: still needs to be processed by autorize.check()
+
+            let lastSynced = data.lastSynced
+            if (data.object[0].dateStored)
+                lastSynced = data.object[0].dateStored
+
             for (let i = 0; i < data.object; i++)
                 data.socket.send(data.object[i])
+
+            data.socket.send({ method: 'sync', lastSynced, syncedMessages: data.syncedMessages, sync: true })
             return
         }
 
