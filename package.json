@@ -42,6 +42,7 @@
   "dependencies": {
     "@cocreate/config": "^1.5.2",
     "@cocreate/uuid": "^1.7.2",
+    "@cocreate/utils": "^1.24.2",
     "ws": "7.5.9"
   }
 }
