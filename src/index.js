@@ -53,7 +53,7 @@ class SocketServer extends EventEmitter {
                     self.onWebSocket(socket);
 
                     if (config.lastSynced)
-                        this.emit('read.object', {
+                        self.emit('read.object', {
                             socket,
                             method: 'read.object',
                             array: 'message_log',
@@ -325,7 +325,7 @@ class SocketServer extends EventEmitter {
             for (let i = 0; i < data.object; i++)
                 data.socket.send(data.object[i])
 
-            data.socket.send({ method: 'sync', lastSynced, syncedMessages: data.syncedMessages, sync: true })
+            data.socket.send({ method: 'sync', _id: data.object[0]._id, lastSynced, syncedMessages: data.syncedMessages, sync: true })
             return
         }
 
