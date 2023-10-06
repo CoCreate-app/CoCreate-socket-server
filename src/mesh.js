@@ -8,20 +8,30 @@ const organizations = {}
 const urls = new Map()
 const servers = {}
 
-function addServer(data) {
+async function addServer(data) {
     if (!servers[data.url])
         servers[data.url] = { [data.serverId]: { [data.organization_id]: true } }
     else
         servers[data.url][data.serverId][data.organization_id] = true
 
     // TODO: needs to get orgaizations activeRegions
-    socket.send({
-        method: 'region.added',
-        host: data.url,
-        activeRegions: '',
-        serverId: data.serverId,
+    let activeRegions = await crud.send({
+        method: 'read.object',
+        array: 'organizations',
+        object: { _id: data.organization_id },
         organization_id: data.organization_id
     })
+
+    console.log('mesh activeRegions: ', activeRegions)
+    // socket.send({
+    //     method: 'region.added',
+    //     host: data.url,
+    //     activeRegions: '',
+    //     serverId: data.serverId,
+    //     broadcast: false,
+    //     broadcastSender: false,
+    //     organization_id: data.organization_id
+    // })
 }
 
 function deleteServer(data) {
@@ -29,12 +39,14 @@ function deleteServer(data) {
     if (!Object.keys(servers[data.url][data.serverId]).length)
         delete servers[data.url][data.serverId]
     if (!Object.keys(servers[data.url]).length) {
-        socket.send({
-            method: 'region.removed', // delete.region
-            host: data.url,
-            serverId: data.serverId,
-            organization_id: data.organization_id
-        })
+        console.log('mesh deleteServer: ', data.url)
+
+        // socket.send({
+        //     method: 'region.removed', // delete.region
+        //     host: data.url,
+        //     serverId: data.serverId,
+        //     organization_id: data.organization_id
+        // })
         socket.delete(data.url)
     }
 

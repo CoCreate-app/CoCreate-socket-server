@@ -6,10 +6,9 @@ const { ObjectId } = require('@cocreate/utils')
 const config = require('@cocreate/config')
 
 class SocketServer extends EventEmitter {
-    constructor(server, prefix) {
+    constructor(server) {
         super();
         this.serverId = uid.generate(12)
-        this.prefix = prefix || "ws";
         this.organizations = new Map();
         this.clients = new Map();
         this.sockets = new Map();
@@ -29,28 +28,28 @@ class SocketServer extends EventEmitter {
 
         server.on('upgrade', (request, socket, head) => {
             const self = this;
-            const config = this.getConfigFromUrl(request.url)
-            if (config.type == this.prefix && config.organization_id) {
+            let organization_id = request.url.split('/')
+            organization_id = organization_id[organization_id.length - 1]
+
+            if (organization_id) {
                 this.wss.handleUpgrade(request, socket, head, function (socket) {
-                    socket.organization_id = config.organization_id
-                    socket.id = config.socketId;
-                    socket.clientId = config.clientId;
+                    let options = decodeURIComponent(request.headers['sec-websocket-protocol'])
+                    options = JSON.parse(options)
+                    socket.organization_id = organization_id
+                    socket.id = options.socketId;
+                    socket.clientId = options.clientId;
+                    socket.pathname = request.url
                     socket.origin = request.headers.origin || request.headers.host
+
                     if (socket.origin.startsWith('http'))
                         socket.origin = socket.origin.replace('http', 'ws')
-                    socket.pathname = request.url
-                    if (!socket.url) {
-                        const lastSlashIndex = socket.pathname.lastIndexOf('/');
-                        socket.socketUrl = socket.pathname.substring(0, lastSlashIndex);
-                        socket.socketUrl = socket.origin + socket.socketUrl
-                    }
+                    if (!socket.url)
+                        socket.socketUrl = socket.origin + socket.pathname
 
                     if (socket.origin && socket.origin !== 'null') {
                         const url = new URL(socket.origin);
-                        socket.host = url.host;
+                        socket.host = url.host || socket.origin;
                     }
-
-                    self.onWebSocket(socket);
 
                     if (config.lastSynced)
                         self.emit('read.object', {
@@ -72,6 +71,19 @@ class SocketServer extends EventEmitter {
                             organization_id: data.organization_id
                         });
 
+                    if (self.authenticate && options.token)
+                        self.authenticate.decodeToken(options.token).then(({ user_id, expires }) => {
+                            if (user_id) {
+                                socket.user_id = user_id;
+                                socket.expires = expires;
+                                self.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
+                            } else
+                                this.emit('userStatus', { socket, user_id, status: 'off', organization_id });
+
+                            self.onWebSocket(socket);
+                        })
+                    else
+                        self.onWebSocket(socket);
                 })
             }
         });
@@ -261,17 +273,13 @@ class SocketServer extends EventEmitter {
             if (data.method) {
                 if (data.method === 'region.added' || data.method === 'region.removed')
                     console.log('data.method: ', data.method)
-                let user_id = null;
-                console.log('socket.protocol: ', socket.protocol)
-                if (this.authenticate)
-                    user_id = await this.authenticate.decodeToken(socket.protocol);
+
+                if (socket.user_id && socket.expires && new Date().getTime() >= socket.expires) {
+                    socket.user_id = socket.expires = null
+                    this.send({ socket, method: 'updateUserStatus', userStatus: 'off', socketId: data.socketId, organization_id })
+                }
 
                 if (this.authorize) {
-                    if (!socket.user_id && user_id) {
-                        socket.user_id = user_id;
-                        this.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
-                    }
-
                     if (!this.sockets.has(socket.id)) {
                         if (!this.organizations.get(organization_id).status)
                             return this.send({ socket, method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
@@ -279,19 +287,16 @@ class SocketServer extends EventEmitter {
 
                     data.socket = socket
 
-                    const authorized = await this.authorize.check(data, user_id)
+                    const authorized = await this.authorize.check(data, socket.user_id)
                     if (authorized.storage === false) {
                         data.database = process.env.organization_id
                         data.organization_id = process.env.organization_id
 
-                        const authorized2 = await this.authorize.check(data, req, user_id)
+                        const authorized2 = await this.authorize.check(data, req, socket.user_id)
                         if (!authorized2 || authorized2.error) {
                             return this.send({ socket, method: 'Access Denied', authorized2, ...data })
                         }
                     } else if (!authorized || authorized.error) {
-                        if (!user_id)
-                            this.send({ socket, method: 'updateUserStatus', userStatus: 'off', socketId: data.socketId, organization_id })
-
                         return this.send({ socket, method: 'Access Denied', authorized, ...data })
                     }
                     // dburl is true and db does not have 'keys' array
@@ -375,15 +380,14 @@ class SocketServer extends EventEmitter {
 
     getConfigFromUrl(pathname) {
         const path = pathname.split("/");
-        if (path[3]) {
-            path[3] = decodeURIComponent(path[3]);
-            path[3] = JSON.parse(path[3]) || {};
+        if (path[2]) {
+            path[2] = decodeURIComponent(path[2]);
+            path[2] = JSON.parse(path[2]) || {};
         }
 
         const config = {
-            type: path[1],
-            organization_id: path[2],
-            ...path[3]
+            organization_id: path[1],
+            ...path[2]
         }
         return config
     }
