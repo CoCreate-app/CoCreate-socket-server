@@ -43,8 +43,8 @@ class SocketServer extends EventEmitter {
 
                     if (socket.origin.startsWith('http'))
                         socket.origin = socket.origin.replace('http', 'ws')
-                    if (!socket.url)
-                        socket.socketUrl = socket.origin + socket.pathname
+
+                    socket.socketUrl = socket.origin + socket.pathname
 
                     if (socket.origin && socket.origin !== 'null') {
                         const url = new URL(socket.origin);
@@ -59,8 +59,7 @@ class SocketServer extends EventEmitter {
                             filter: {
                                 query: [
                                     { key: 'dateStored', value: config.lastSynced, operator: '$gt' },
-                                    { key: '_id', value: config.syncedMessages, operator: '$nin' },
-                                    { key: 'dateStored', direction: 'false', operator: '$ne' }
+                                    { key: '_id', value: config.syncedMessages, operator: '$nin' }
                                 ],
                                 sort: [
                                     { key: 'broadcast', value: 'desc' }
@@ -68,7 +67,7 @@ class SocketServer extends EventEmitter {
                             },
                             sync: true,
                             syncedMessages: config.syncedMessages,
-                            organization_id: data.organization_id
+                            organization_id
                         });
 
                     if (self.authenticate && options.token)
@@ -319,63 +318,65 @@ class SocketServer extends EventEmitter {
     }
 
     async send(data) {
-        // if (data.syncdata.array === 'message_log' && data.method.startsWith('read.')) {
         if (data.sync) {
-            // TODO: still needs to be processed by autorize.check()
-
             let lastSynced = data.lastSynced
             if (data.object[0].dateStored)
                 lastSynced = data.object[0].dateStored
 
-            for (let i = 0; i < data.object; i++)
-                data.socket.send(data.object[i])
+            for (let i = 0; i < data.object; i++) {
+                const authorized = await this.authorize.check(data.object[i].data, sockets[i].user_id)
+                if (authorized && authorized.authorized)
+                    sockets[i].send(JSON.stringify(authorized.authorized));
+                else
+                    sockets[i].send(JSON.stringify(data.object[i].data));
+            }
 
             data.socket.send({ method: 'sync', _id: data.object[0]._id, lastSynced, syncedMessages: data.syncedMessages, sync: true })
-            return
-        }
 
-        // const socket = this.sockets.get(data.socketId)
-        const socket = data.socket
-        const sent = []
+        } else {
 
-        const authorized = await this.authorize.check(data, socket.user_id)
-        if (authorized && authorized.authorized)
-            data = authorized.authorized
+            // const socket = this.sockets.get(data.socketId)
+            const socket = data.socket
+            const sent = []
 
-        let _id = ObjectId() // could use data.uid and perhaps data.uid should be a document_id
-        if (!data.method.startsWith('read.') || data.log) {
-            let object = { _id, ...data, $currentDate: { dateStored: true } }
-            delete object.socket
-            this.emit('update.object', {
-                method: 'update.object',
-                array: 'message_log',
-                object,
-                upsert: true,
-                organization_id: data.organization_id
-            });
-        }
-
-        data.syncedMessage = _id
-        let sockets = this.get(data);
-
-        delete data.socket
-
-        for (let i = 0; i < sockets.length; i++) {
-            const authorized = await this.authorize.check(data, sockets[i].user_id)
+            const authorized = await this.authorize.check(data, socket.user_id)
             if (authorized && authorized.authorized)
-                sockets[i].send(JSON.stringify(authorized.authorized));
-            else
-                sockets[i].send(JSON.stringify(data));
-            sent.push(socket.clientId)
-            this.emit("setBandwidth", {
-                type: 'out',
-                data: authorized.authorized || data,
-                organization_id: socket.organization_id
-            })
-        }
+                data = authorized.authorized
 
-        // TODO: sent is an array of clientId's so that notification can send to subscribed clients that are not currently connected
-        this.emit("notification", { sent })
+            let _id = ObjectId() // could use data.uid and perhaps data.uid should be a document_id
+            if (!data.method.startsWith('read.') || data.log) {
+                let object = { _id, url: socket.socketUrl, data, $currentDate: { dateStored: true } }
+                delete object.socket
+                this.emit('create.object', {
+                    method: 'create.object',
+                    array: 'message_log',
+                    object,
+                    organization_id: data.organization_id
+                });
+            }
+
+            data.syncedMessage = _id
+            let sockets = this.get(data);
+
+            delete data.socket
+
+            for (let i = 0; i < sockets.length; i++) {
+                const authorized = await this.authorize.check(data, sockets[i].user_id)
+                if (authorized && authorized.authorized)
+                    sockets[i].send(JSON.stringify(authorized.authorized));
+                else
+                    sockets[i].send(JSON.stringify(data));
+                sent.push(socket.clientId)
+                this.emit("setBandwidth", {
+                    type: 'out',
+                    data: authorized.authorized || data,
+                    organization_id: socket.organization_id
+                })
+            }
+
+            // TODO: sent is an array of clientId's so that notification can send to subscribed clients that are not currently connected
+            this.emit("notification", { sent })
+        }
     }
 
     getConfigFromUrl(pathname) {
