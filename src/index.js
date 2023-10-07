@@ -35,6 +35,7 @@ class SocketServer extends EventEmitter {
                 this.wss.handleUpgrade(request, socket, head, function (socket) {
                     let options = decodeURIComponent(request.headers['sec-websocket-protocol'])
                     options = JSON.parse(options)
+
                     socket.organization_id = organization_id
                     socket.id = options.socketId;
                     socket.clientId = options.clientId;
@@ -51,24 +52,27 @@ class SocketServer extends EventEmitter {
                         socket.host = url.host || socket.origin;
                     }
 
-                    if (config.lastSynced)
-                        self.emit('read.object', {
-                            socket,
-                            method: 'read.object',
-                            array: 'message_log',
-                            filter: {
-                                query: [
-                                    { key: 'dateStored', value: config.lastSynced, operator: '$gt' },
-                                    { key: '_id', value: config.syncedMessages, operator: '$nin' }
-                                ],
-                                sort: [
-                                    { key: 'broadcast', value: 'desc' }
-                                ]
-                            },
-                            sync: true,
-                            syncedMessages: config.syncedMessages,
-                            organization_id
-                        });
+                    let data = {
+                        socket,
+                        method: 'read.object',
+                        array: 'message_log',
+                        $filter: {
+                            sort: [
+                                { key: '_id', direction: 'desc' }
+                            ]
+                        },
+                        sync: true,
+                        organization_id
+                    }
+
+                    if (options.lastSynced)
+                        data.$filter.query = [
+                            { key: '_id', value: options.lastSynced, operator: '$gt' }
+                        ]
+                    else
+                        data.$filter.limit = 1
+
+                    self.emit('read.object', data);
 
                     if (self.authenticate && options.token)
                         self.authenticate.decodeToken(options.token).then(({ user_id, expires }) => {
@@ -318,34 +322,33 @@ class SocketServer extends EventEmitter {
     }
 
     async send(data) {
+        const socket = data.socket
+
         if (data.sync) {
-            let lastSynced = data.lastSynced
-            if (data.object[0].dateStored)
-                lastSynced = data.object[0].dateStored
+            if (!data.object || !data.object.length)
+                return
 
-            for (let i = 0; i < data.object; i++) {
-                const authorized = await this.authorize.check(data.object[i].data, sockets[i].user_id)
+            for (let i = 0; i < data.object.length; i++) {
+                data.object[i].data._id = data.object[i]._id
+                data.object[i].data.sync = true
+
+                const authorized = await this.authorize.check(data.object[i].data, socket.user_id)
                 if (authorized && authorized.authorized)
-                    sockets[i].send(JSON.stringify(authorized.authorized));
+                    socket.send(JSON.stringify(authorized.authorized));
                 else
-                    sockets[i].send(JSON.stringify(data.object[i].data));
+                    socket.send(JSON.stringify(data.object[i].data));
             }
-
-            data.socket.send({ method: 'sync', _id: data.object[0]._id, lastSynced, syncedMessages: data.syncedMessages, sync: true })
-
         } else {
 
             // const socket = this.sockets.get(data.socketId)
-            const socket = data.socket
             const sent = []
 
             const authorized = await this.authorize.check(data, socket.user_id)
             if (authorized && authorized.authorized)
                 data = authorized.authorized
 
-            let _id = ObjectId() // could use data.uid and perhaps data.uid should be a document_id
             if (!data.method.startsWith('read.') || data.log) {
-                let object = { _id, url: socket.socketUrl, data, $currentDate: { dateStored: true } }
+                let object = { url: socket.socketUrl, data } // could store data._id for crud
                 delete object.socket
                 this.emit('create.object', {
                     method: 'create.object',
@@ -355,7 +358,6 @@ class SocketServer extends EventEmitter {
                 });
             }
 
-            data.syncedMessage = _id
             let sockets = this.get(data);
 
             delete data.socket
