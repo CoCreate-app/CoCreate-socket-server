@@ -322,6 +322,7 @@ class SocketServer extends EventEmitter {
     }
 
     async send(data) {
+        // const socket = this.sockets.get(data.socketId)
         const socket = data.socket
 
         if (data.sync) {
@@ -339,8 +340,6 @@ class SocketServer extends EventEmitter {
                     socket.send(JSON.stringify(data.object[i].data));
             }
         } else {
-
-            // const socket = this.sockets.get(data.socketId)
             const sent = []
 
             const authorized = await this.authorize.check(data, socket.user_id)
@@ -348,7 +347,7 @@ class SocketServer extends EventEmitter {
                 data = authorized.authorized
 
             if (!data.method.startsWith('read.') || data.log) {
-                let object = { url: socket.socketUrl, data } // could store data._id for crud
+                let object = { url: socket.socketUrl, data }
                 delete object.socket
                 this.emit('create.object', {
                     method: 'create.object',
