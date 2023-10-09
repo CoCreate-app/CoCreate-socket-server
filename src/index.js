@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const { URL } = require("url");
 const EventEmitter = require("events").EventEmitter;
 const uid = require('@cocreate/uuid')
-const { ObjectId } = require('@cocreate/utils')
+// const { ObjectId } = require('@cocreate/utils')
 const config = require('@cocreate/config')
 
 class SocketServer extends EventEmitter {
