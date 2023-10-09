@@ -1,3 +1,12 @@
+## [1.19.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.19.0...v1.19.1) (2023-10-09)
+
+
+### Bug Fixes
+
+* authentication ([ccc5e1d](https://github.com/CoCreate-app/CoCreate-socket-server/commit/ccc5e1d4aa50e3dc2ea627200c634a0ca7c83721))
+* bump cocreate dependency versions ([6c74306](https://github.com/CoCreate-app/CoCreate-socket-server/commit/6c7430664987fdfe955fe705c413a7313e5dca51))
+* this to self ([24119fb](https://github.com/CoCreate-app/CoCreate-socket-server/commit/24119fb5583ad34fd2210befad92fba1743ce804))
+
 # [1.19.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.18.1...v1.19.0) (2023-10-09)
 
 
