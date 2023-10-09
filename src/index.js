@@ -74,17 +74,19 @@ class SocketServer extends EventEmitter {
 
                     self.emit('read.object', data);
 
-                    if (self.authenticate && options.token)
-                        self.authenticate.decodeToken(options.token).then(({ user_id, expires }) => {
-                            if (user_id) {
-                                socket.user_id = user_id;
-                                socket.expires = expires;
-                                self.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
-                            } else
-                                this.emit('userStatus', { socket, user_id, status: 'off', organization_id });
+                    if (self.authenticate && options.token) {
+                        let { user_id, expires } = self.authenticate.decodeToken(options.token)
+                        // self.authenticate.decodeToken(options.token).then(({ user_id, expires }) => {
+                        if (user_id) {
+                            socket.user_id = user_id;
+                            socket.expires = expires;
+                            self.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
+                        } else
+                            this.emit('userStatus', { socket, user_id, status: 'off', organization_id });
 
-                            self.onWebSocket(socket);
-                        })
+                        self.onWebSocket(socket);
+                        // })
+                    }
                     else
                         self.onWebSocket(socket);
                 })
