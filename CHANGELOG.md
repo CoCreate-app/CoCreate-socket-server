@@ -1,3 +1,23 @@
+# [1.19.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.18.1...v1.19.0) (2023-10-09)
+
+
+### Bug Fixes
+
+* added '@cocreate/utlis' ([cc8267a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/cc8267abf7ded45033929bd4c4997eb9adc89d42))
+* handling of socket.id and clientId ([9e66f16](https://github.com/CoCreate-app/CoCreate-socket-server/commit/9e66f16f4e869e7ec29a261068fb61c46569f408))
+* Improved handling of data.sync ([190ebd6](https://github.com/CoCreate-app/CoCreate-socket-server/commit/190ebd6c10f337fbd4e8be81caba865cfffb5c0a))
+* send _id with syncMessage ([e37e2de](https://github.com/CoCreate-app/CoCreate-socket-server/commit/e37e2de8aff8945a3884c416514adc1e89fc54e2))
+* update to use data.socketId and data.clientId ([125f2be](https://github.com/CoCreate-app/CoCreate-socket-server/commit/125f2bedd6090488ae26dc2228b53bb4aa63d4ff))
+* use message_log ([d4b4c4a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/d4b4c4ad2708cd61567d7172ac7bcb0635349a6a))
+
+
+### Features
+
+* Authentication happens during upgrade ([c01cb0e](https://github.com/CoCreate-app/CoCreate-socket-server/commit/c01cb0eeb5fc4e135a8d9855fbab7e8b9535423d))
+* get, set, delete socket functions ([9066911](https://github.com/CoCreate-app/CoCreate-socket-server/commit/9066911016072841cd08463c8354eeef892b41e3))
+* method sync sent to server with sync details ([3c914b7](https://github.com/CoCreate-app/CoCreate-socket-server/commit/3c914b74d720949c8ae56f3f9159041ef1d5f24f))
+* on socket connection the data is parsed from ([0b69b35](https://github.com/CoCreate-app/CoCreate-socket-server/commit/0b69b357c891da63c3e94aaca8361866f252de98))
+
 ## [1.18.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.18.0...v1.18.1) (2023-09-18)
 
 
