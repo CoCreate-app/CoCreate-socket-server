@@ -82,7 +82,7 @@ class SocketServer extends EventEmitter {
                             socket.expires = expires;
                             self.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
                         } else
-                            this.emit('userStatus', { socket, user_id, status: 'off', organization_id });
+                            self.emit('userStatus', { socket, user_id, status: 'off', organization_id });
 
                         self.onWebSocket(socket);
                         // })
