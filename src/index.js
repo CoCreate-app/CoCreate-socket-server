@@ -31,8 +31,20 @@ class SocketServer extends EventEmitter {
             let organization_id = request.url.split('/')
             organization_id = organization_id[organization_id.length - 1]
 
-            if (organization_id) {
-                this.wss.handleUpgrade(request, socket, head, function (socket) {
+            this.wss.handleUpgrade(request, socket, head, function (socket) {
+                if (organization_id) {
+                    let organization = self.organizations.get(organization_id)
+                    if (organization && organization.status === false) {
+                        let errors = {}
+                        errors.serverOrganization = organization.serverOrganization
+                        errors.serverStorage = organization.serverStorage
+                        errors.organizationBalance = organization.organizationBalance
+                        errors.error = organization.error
+                        return socket.send(JSON.stringify({ method: 'Access Denied', error: errors }))
+                    }
+                    // if (!organization)
+                    //     return socket.send(JSON.stringify({ method: 'Access Denied', error: organization.error }))
+
                     let options = decodeURIComponent(request.headers['sec-websocket-protocol'])
                     options = JSON.parse(options)
 
@@ -86,11 +98,12 @@ class SocketServer extends EventEmitter {
 
                         self.onWebSocket(socket);
                         // })
-                    }
-                    else
+                    } else
                         self.onWebSocket(socket);
-                })
-            }
+                } else {
+                    socket.send(JSON.stringify({ method: 'Access Denied', error: 'An organization_id is required' }))
+                }
+            })
         });
     }
 
@@ -140,11 +153,17 @@ class SocketServer extends EventEmitter {
                 organization_id
             });
 
-        }
+        } else
+            clearTimeout(organization.debounce);
+
 
         if (!this.clients.has(socket.clientId)) {
             this.clients.set(socket.clientId, []);
-            organization.clients[socket.clientId] = []
+
+            if (!organization.clients)
+                organization.clients = { [socket.clientId]: [] }
+            else
+                organization.clients[socket.clientId] = []
         }
 
         if (!this.sockets.has(socket.id)) {
@@ -179,9 +198,6 @@ class SocketServer extends EventEmitter {
                     else
                         sockets.push(...clients[client])
                 }
-            } else {
-                // TODO: requires a messageQueue that expires
-                console.log('organization could not be found', data)
             }
         } else if (data.broadcastSender !== false) {
             sockets.push(data.socket)
@@ -192,8 +208,9 @@ class SocketServer extends EventEmitter {
     delete(socket) {
         let organization_id = socket.organization_id
         if (this.organizations.has(organization_id)) {
-            const clients = this.organizations.get(organization_id).clients;
-
+            let clients = this.organizations.get(organization_id)
+            if (clients)
+                clients.clients;
             // Check if the client exists
             if (clients && clients[socket.clientId]) {
                 const client = clients[socket.clientId]
@@ -241,21 +258,34 @@ class SocketServer extends EventEmitter {
         }
 
         if (this.clients.size === 0) {
-            this.organizations.delete(socket.organization_id);
-        }
+            let organization = this.organizations.get(socket.organization_id)
+            let debounceTimer
+            if (organization)
+                debounceTimer = organization.debounce
 
-        this.sockets.delete(socket.id);
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                this.organizations.delete(socket.organization_id);
+            }, 10000);
 
-        if (socket.user_id) {
-            let sockets = this.users.get(socket.user_id)
-            if (sockets) {
-                const index = sockets.findIndex(item => item.id === socket.id);
-                if (index !== -1) {
-                    sockets.splice(index, 1);
-                }
-                if (!sockets.length) {
-                    this.users.delete(socket.user_id);
-                    this.emit('userStatus', { socket, user_id, status: 'off', organization_id });
+            if (!organization)
+                this.organizations.set(socket.organization_id, { debounce: debounceTimer })
+            else
+                organization.debounce = debounceTimer
+
+            this.sockets.delete(socket.id);
+
+            if (socket.user_id) {
+                let sockets = this.users.get(socket.user_id)
+                if (sockets) {
+                    const index = sockets.findIndex(item => item.id === socket.id);
+                    if (index !== -1) {
+                        sockets.splice(index, 1);
+                    }
+                    if (!sockets.length) {
+                        this.users.delete(socket.user_id);
+                        this.emit('userStatus', { socket, user_id, status: 'off', organization_id });
+                    }
                 }
             }
         }
@@ -271,8 +301,9 @@ class SocketServer extends EventEmitter {
                 organization_id
             });
 
-            if (this.organizations.has(organization_id) && !this.organizations.get(organization_id).status)
-                return this.send({ socket, method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
+            const organization = this.organizations.get(organization_id)
+            if (organization && organization.organizationBalance == false)
+                return socket.send({ method: 'Access Denied', organizationBalance: false, error: organization.error })
 
             let data = JSON.parse(message)
             if (data.method) {
@@ -286,24 +317,47 @@ class SocketServer extends EventEmitter {
 
                 if (this.authorize) {
                     if (!this.sockets.has(socket.id)) {
-                        if (!this.organizations.get(organization_id).status)
-                            return this.send({ socket, method: 'Access Denied', balance: 'Your balance has fallen bellow 0' })
+                        if (organization && !organization.organizationBalance == false)
+                            return socket.send({ method: 'Access Denied', organizationBalance: false, error: organization.error })
                     }
 
                     data.socket = socket
 
                     const authorized = await this.authorize.check(data, socket.user_id)
-                    if (authorized.storage === false) {
+                    let errors = {}
+                    if (authorized.serverOrganization === false) {
+                        organization.status = errors.status = false;
+                        organization.serverOrganization = false;
+                        organization.error = authorized.error
+                    } else if (authorized.serverStorage === false) {
                         data.database = process.env.organization_id
                         data.organization_id = process.env.organization_id
 
                         const authorized2 = await this.authorize.check(data, req, socket.user_id)
                         if (!authorized2 || authorized2.error) {
-                            return this.send({ socket, method: 'Access Denied', authorized2, ...data })
+                            organization.status = errors.status = false;
+                            organization.error = errors.error = authorized.error
+                            if (authorized2.serverOrganization === false) {
+                                organization.serverOrganization = false;
+                            }
+                            if (authorized2.serverStorage === false) {
+                                organization.serverStorage = false;
+                            }
                         }
-                    } else if (!authorized || authorized.error) {
-                        return this.send({ socket, method: 'Access Denied', authorized, ...data })
+                    } else if (authorized.error) {
+                        organization.status = false;
+                        organization.error = authorized.error
                     }
+
+                    if (organization && organization.status === false) {
+                        let errors = {}
+                        errors.serverOrganization = organization.serverOrganization
+                        errors.serverStorage = organization.serverStorage
+                        errors.organizationBalance = organization.organizationBalance
+                        errors.error = organization.error
+                        return socket.send(JSON.stringify({ method: 'Access Denied', ...errors }))
+                    }
+
                     // dburl is true and db does not have 'keys' array
                     // action: syncCollection data{array: 'keys', object[]}
                     // actions: add keys as once keys are added admin user can do anything
