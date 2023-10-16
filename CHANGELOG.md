@@ -1,3 +1,10 @@
+## [1.19.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.19.4...v1.19.5) (2023-10-16)
+
+
+### Bug Fixes
+
+* improved error handling ([a3e5d31](https://github.com/CoCreate-app/CoCreate-socket-server/commit/a3e5d314143f135816de7b51696626c53e6a88f0))
+
 ## [1.19.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.19.3...v1.19.4) (2023-10-14)
 
 
