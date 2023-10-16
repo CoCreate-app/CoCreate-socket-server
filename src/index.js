@@ -42,8 +42,6 @@ class SocketServer extends EventEmitter {
                         errors.error = organization.error
                         return socket.send(JSON.stringify({ method: 'Access Denied', error: errors }))
                     }
-                    // if (!organization)
-                    //     return socket.send(JSON.stringify({ method: 'Access Denied', error: organization.error }))
 
                     let options = decodeURIComponent(request.headers['sec-websocket-protocol'])
                     options = JSON.parse(options)
@@ -301,12 +299,16 @@ class SocketServer extends EventEmitter {
                 organization_id
             });
 
-            const organization = this.organizations.get(organization_id)
-            if (organization && organization.organizationBalance == false)
-                return socket.send({ method: 'Access Denied', organizationBalance: false, error: organization.error })
 
             let data = JSON.parse(message)
             if (data.method) {
+                const organization = this.organizations.get(organization_id)
+                if (organization && organization.organizationBalance == false) {
+                    data.organizationBalance = false
+                    data.error = organization.error
+                    return socket.send(JSON.stringify(data))
+                }
+
                 if (data.method === 'region.added' || data.method === 'region.removed')
                     console.log('data.method: ', data.method)
 
@@ -317,8 +319,11 @@ class SocketServer extends EventEmitter {
 
                 if (this.authorize) {
                     if (!this.sockets.has(socket.id)) {
-                        if (organization && !organization.organizationBalance == false)
-                            return socket.send({ method: 'Access Denied', organizationBalance: false, error: organization.error })
+                        if (organization && organization.organizationBalance == false) {
+                            data.organizationBalance = false
+                            data.error = organization.error
+                            return socket.send(JSON.stringify(data))
+                        }
                     }
 
                     data.socket = socket
@@ -351,11 +356,11 @@ class SocketServer extends EventEmitter {
 
                     if (organization && organization.status === false) {
                         let errors = {}
-                        errors.serverOrganization = organization.serverOrganization
-                        errors.serverStorage = organization.serverStorage
-                        errors.organizationBalance = organization.organizationBalance
-                        errors.error = organization.error
-                        return socket.send(JSON.stringify({ method: 'Access Denied', ...errors }))
+                        data.serverOrganization = organization.serverOrganization
+                        data.serverStorage = organization.serverStorage
+                        data.organizationBalance = organization.organizationBalance
+                        data.error = organization.error
+                        return socket.send(JSON.stringify(data))
                     }
 
                     // dburl is true and db does not have 'keys' array
