@@ -84,16 +84,16 @@ class SocketServer extends EventEmitter {
 
                     self.emit('read.object', data);
 
-                    if (self.authenticate && options.token) {
+                    if (self.authenticate) {
                         const { user_id, expires } = self.authenticate.decodeToken(options.token)
 
                         if (user_id) {
                             socket.user_id = user_id;
                             socket.expires = expires;
                             self.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
-                            this.emit("notification.user", socket)
+                            self.emit("notification.user", socket)
                         } else
-                            self.emit('userStatus', { socket, user_id, status: 'off', organization_id });
+                            self.emit('userStatus', { socket, user_id: options.user_id, userStatus: 'off', organization_id });
 
                         self.onWebSocket(socket);
 
@@ -173,12 +173,13 @@ class SocketServer extends EventEmitter {
 
         if (socket.user_id) {
             this.emit('userStatus', { socket, user_id: socket.user_id, userStatus: 'on', organization_id });
+            let user = this.users.get(socket.user_id)
 
-            if (!this.users.has(socket.user_id)) {
+            if (!Array.isArray(user)) {
+                clearTimeout(user)
                 this.users.set(socket.user_id, [socket])
-            } else {
-                this.users.get(socket.user_id).push(socket)
-            }
+            } else
+                user.push(socket)
         }
 
     }
@@ -277,13 +278,22 @@ class SocketServer extends EventEmitter {
             if (socket.user_id) {
                 let sockets = this.users.get(socket.user_id)
                 if (sockets) {
-                    const index = sockets.findIndex(item => item.id === socket.id);
-                    if (index !== -1) {
-                        sockets.splice(index, 1);
-                    }
-                    if (!sockets.length) {
-                        this.users.delete(socket.user_id);
-                        this.emit('userStatus', { socket, user_id, status: 'off', organization_id });
+                    if (Array.isArray(sockets) && sockets.length) {
+                        const index = sockets.findIndex(item => item.id === socket.id);
+                        if (index !== -1) {
+                            sockets.splice(index, 1);
+                        }
+                    } else {
+                        let userDebounceTimer = sockets
+
+                        clearTimeout(userDebounceTimer);
+                        userDebounceTimer = setTimeout(() => {
+                            this.users.delete(socket.user_id);
+                            this.emit('userStatus', { socket, user_id: socket.user_id, userStatus: 'off', organization_id });
+                        }, 10000);
+
+                        this.users.set(socket.user_id, userDebounceTimer)
+
                     }
                 }
             }
