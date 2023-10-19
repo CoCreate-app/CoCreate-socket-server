@@ -1,3 +1,17 @@
+# [1.20.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.19.5...v1.20.0) (2023-10-19)
+
+
+### Bug Fixes
+
+* delete data.socket ([4fd38ff](https://github.com/CoCreate-app/CoCreate-socket-server/commit/4fd38ffd9989502955eb73d7d21f90102ea41e69))
+* improved error handling ([04be91f](https://github.com/CoCreate-app/CoCreate-socket-server/commit/04be91ffcc62c7270fc83cbb1c755125485496fb))
+
+
+### Features
+
+* delay user deletion for potential reconnect ([34e3a14](https://github.com/CoCreate-app/CoCreate-socket-server/commit/34e3a143776a0e67f8cea56ab2f0334a1e349df2))
+* If authinticated emit 'notification.user' ([ac4779f](https://github.com/CoCreate-app/CoCreate-socket-server/commit/ac4779f0773e5f9b906390648c536e654cc1f40a))
+
 ## [1.19.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.19.4...v1.19.5) (2023-10-16)
 
 
