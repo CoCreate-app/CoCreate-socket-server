@@ -1,3 +1,10 @@
+## [1.20.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.20.0...v1.20.1) (2023-10-19)
+
+
+### Bug Fixes
+
+* do not log updateUserStatus ([f98961b](https://github.com/CoCreate-app/CoCreate-socket-server/commit/f98961b91106ea34b3afeefdafbfcc1dffca095e))
+
 # [1.20.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.19.5...v1.20.0) (2023-10-19)
 
 
