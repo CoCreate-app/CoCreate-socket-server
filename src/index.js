@@ -86,14 +86,16 @@ class SocketServer extends EventEmitter {
 
                     if (self.authenticate) {
                         const { user_id, expires } = self.authenticate.decodeToken(options.token)
-
+                        const userStatus = { socket, method: 'userStatus', user_id: options.user_id, userStatus: 'off', organization_id }
                         if (user_id) {
+                            options.user_id = user_id
                             socket.user_id = user_id;
                             socket.expires = expires;
-                            self.emit('userStatus', { socket, method: 'userStatus', user_id, userStatus: 'on', organization_id });
+                            userStatus.userStatus = 'on'
                             self.emit("notification.user", socket)
-                        } else
-                            self.emit('userStatus', { socket, user_id: options.user_id, userStatus: 'off', organization_id });
+                        }
+
+                        self.emit('userStatus', userStatus);
 
                         self.onWebSocket(socket);
 
@@ -419,7 +421,7 @@ class SocketServer extends EventEmitter {
             if (authorized && authorized.authorized)
                 data = authorized.authorized
 
-            if (!data.method.startsWith('read.') || data.log) {
+            if (!data.method.startsWith('read.') || data.log || data.method !== 'updateUserStatus' || data.method !== 'userStatus') {
                 let object = { url: socket.socketUrl, data }
                 delete object.socket
                 this.emit('create.object', {
