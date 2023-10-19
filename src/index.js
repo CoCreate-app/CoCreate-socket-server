@@ -371,6 +371,7 @@ class SocketServer extends EventEmitter {
                         data.serverStorage = organization.serverStorage
                         data.organizationBalance = organization.organizationBalance
                         data.error = organization.error
+                        delete data.socket
                         return socket.send(JSON.stringify(data))
                     }
 
