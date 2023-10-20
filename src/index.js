@@ -421,7 +421,7 @@ class SocketServer extends EventEmitter {
             if (authorized && authorized.authorized)
                 data = authorized.authorized
 
-            if (!data.method.startsWith('read.') || data.log || data.method !== 'updateUserStatus' || data.method !== 'userStatus') {
+            if (!data.method.startsWith('read.') && data.method !== 'updateUserStatus' && data.method !== 'userStatus' && data.method !== 'signIn' && data.method !== 'signUp') {
                 let object = { url: socket.socketUrl, data }
                 delete object.socket
                 this.emit('create.object', {
