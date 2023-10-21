@@ -1,3 +1,10 @@
+## [1.20.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.20.1...v1.20.2) (2023-10-21)
+
+
+### Bug Fixes
+
+* added more methods to the message_log if condition ([37f1106](https://github.com/CoCreate-app/CoCreate-socket-server/commit/37f1106efc30c1278aded8462d779c70e18f28f4))
+
 ## [1.20.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.20.0...v1.20.1) (2023-10-19)
 
 
