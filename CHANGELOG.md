@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.20.2...v1.21.0) (2023-10-22)
+
+
+### Features
+
+* ObjectId() returns an object containg the parts iof the _id along with a toString() function ([d0fffc7](https://github.com/CoCreate-app/CoCreate-socket-server/commit/d0fffc777f099b242a0dccfe5ed6b8008d54dda2))
+
 ## [1.20.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.20.1...v1.20.2) (2023-10-21)
 
 
