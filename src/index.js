@@ -39,7 +39,7 @@ class SocketServer extends EventEmitter {
                         errors.serverStorage = organization.serverStorage
                         errors.organizationBalance = organization.organizationBalance
                         errors.error = organization.error
-                        return socket.send(JSON.stringify({ method: 'Access Denied', error: errors }))
+                        socket.send(JSON.stringify({ method: 'Access Denied', error: errors }))
                     }
 
                     let options = decodeURIComponent(request.headers['sec-websocket-protocol'])
@@ -61,45 +61,49 @@ class SocketServer extends EventEmitter {
                         socket.host = url.host || socket.origin;
                     }
 
-                    let data = {
-                        socket,
-                        method: 'read.object',
-                        array: 'message_log',
-                        $filter: {
-                            sort: [
-                                { key: '_id', direction: 'desc' }
-                            ]
-                        },
-                        sync: true,
-                        organization_id
-                    }
-
-                    if (options.lastSynced)
-                        data.$filter.query = [
-                            { key: '_id', value: options.lastSynced, operator: '$gt' }
-                        ]
-                    else
-                        data.$filter.limit = 1
-
-                    self.emit('read.object', data);
-
-                    if (self.authenticate) {
-                        const { user_id, expires } = self.authenticate.decodeToken(options.token)
-                        const userStatus = { socket, method: 'userStatus', user_id: options.user_id, userStatus: 'off', organization_id }
-                        if (user_id) {
-                            options.user_id = user_id
-                            socket.user_id = user_id;
-                            socket.expires = expires;
-                            userStatus.userStatus = 'on'
-                            self.emit("notification.user", socket)
+                    if (organization && organization.status !== false) {
+                        let data = {
+                            socket,
+                            method: 'read.object',
+                            array: 'message_log',
+                            $filter: {
+                                sort: [
+                                    { key: '_id', direction: 'desc' }
+                                ]
+                            },
+                            sync: true,
+                            organization_id
                         }
 
-                        self.emit('userStatus', userStatus);
+                        if (options.lastSynced)
+                            data.$filter.query = [
+                                { key: '_id', value: options.lastSynced, operator: '$gt' }
+                            ]
+                        else
+                            data.$filter.limit = 1
 
-                        self.onWebSocket(socket);
+                        self.emit('read.object', data);
 
+                        if (self.authenticate) {
+                            const { user_id, expires } = self.authenticate.decodeToken(options.token)
+                            const userStatus = { socket, method: 'userStatus', user_id: options.user_id, userStatus: 'off', organization_id }
+                            if (user_id) {
+                                options.user_id = user_id
+                                socket.user_id = user_id;
+                                socket.expires = expires;
+                                userStatus.userStatus = 'on'
+                                self.emit("notification.user", socket)
+                            }
+
+                            self.emit('userStatus', userStatus);
+
+                            self.onWebSocket(socket);
+
+                        } else
+                            self.onWebSocket(socket);
                     } else
                         self.onWebSocket(socket);
+
                 } else {
                     socket.send(JSON.stringify({ method: 'Access Denied', error: 'An organization_id is required' }))
                 }
@@ -420,7 +424,7 @@ class SocketServer extends EventEmitter {
             if (authorized && authorized.authorized)
                 data = authorized.authorized
 
-            if (!data.method.startsWith('read.') && data.method !== 'updateUserStatus' && data.method !== 'userStatus' && data.method !== 'signIn' && data.method !== 'signUp') {
+            if (data.log !== false && data.log !== 'false' && !data.method.startsWith('read.') && data.method !== 'updateUserStatus' && data.method !== 'userStatus' && data.method !== 'signIn' && data.method !== 'signUp') {
                 let object = { url: socket.socketUrl, data }
                 delete object.socket
                 this.emit('create.object', {
