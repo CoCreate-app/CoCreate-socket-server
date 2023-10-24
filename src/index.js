@@ -61,7 +61,7 @@ class SocketServer extends EventEmitter {
                         socket.host = url.host || socket.origin;
                     }
 
-                    if (organization && organization.status !== false) {
+                    if (!organization || organization && organization.status !== false) {
                         let data = {
                             socket,
                             method: 'read.object',
