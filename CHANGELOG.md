@@ -1,3 +1,11 @@
+## [1.21.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.0...v1.21.1) (2023-10-24)
+
+
+### Bug Fixes
+
+* allow organization to connect if serverOrganization false ([b91a1b5](https://github.com/CoCreate-app/CoCreate-socket-server/commit/b91a1b574ecb14604245930bd8ebf563f9e9f445))
+* return access denied ([bb9a929](https://github.com/CoCreate-app/CoCreate-socket-server/commit/bb9a929481fc34fc2ead377577100cf6908c4707))
+
 # [1.21.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.20.2...v1.21.0) (2023-10-22)
 
 
