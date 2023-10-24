@@ -39,7 +39,7 @@ class SocketServer extends EventEmitter {
                         errors.serverStorage = organization.serverStorage
                         errors.organizationBalance = organization.organizationBalance
                         errors.error = organization.error
-                        socket.send(JSON.stringify({ method: 'Access Denied', error: errors }))
+                        return socket.send(JSON.stringify({ method: 'Access Denied', error: errors }))
                     }
 
                     let options = decodeURIComponent(request.headers['sec-websocket-protocol'])
@@ -101,8 +101,7 @@ class SocketServer extends EventEmitter {
 
                         } else
                             self.onWebSocket(socket);
-                    } else
-                        self.onWebSocket(socket);
+                    }
 
                 } else {
                     socket.send(JSON.stringify({ method: 'Access Denied', error: 'An organization_id is required' }))
