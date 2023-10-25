@@ -172,7 +172,10 @@ class SocketServer extends EventEmitter {
         if (!this.sockets.has(socket.id)) {
             this.sockets.set(socket.id, socket);
             this.clients.get(socket.clientId).push(socket);
-            organization.clients[socket.clientId].push(socket)
+            if (!organization.clients[socket.clientId])
+                organization.clients[socket.clientId] = [socket]
+            else
+                organization.clients[socket.clientId].push(socket)
         }
 
         if (socket.user_id) {
