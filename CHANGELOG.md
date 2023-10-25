@@ -1,3 +1,10 @@
+## [1.21.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.3...v1.21.4) (2023-10-25)
+
+
+### Bug Fixes
+
+* socket push conditions ([887fef3](https://github.com/CoCreate-app/CoCreate-socket-server/commit/887fef3d86d35eb9a0832dd1d0cd998652a494dc))
+
 ## [1.21.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.2...v1.21.3) (2023-10-25)
 
 
