@@ -427,6 +427,7 @@ class SocketServer extends EventEmitter {
                 data = authorized.authorized
 
             if (data.log !== false && data.log !== 'false' && !data.method.startsWith('read.') && data.method !== 'updateUserStatus' && data.method !== 'userStatus' && data.method !== 'signIn' && data.method !== 'signUp') {
+                // TODO: store logged messages more efficently by combing objects wherever possible
                 // let object = { url: socket.socketUrl, data }
                 // delete object.socket
                 // this.emit('create.object', {
