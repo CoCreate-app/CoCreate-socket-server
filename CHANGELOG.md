@@ -1,3 +1,10 @@
+## [1.21.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.4...v1.21.5) (2023-10-26)
+
+
+### Bug Fixes
+
+* disabled message_log ([0977880](https://github.com/CoCreate-app/CoCreate-socket-server/commit/09778807aeaf9b7d574d956e0327d3277554ea19))
+
 ## [1.21.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.3...v1.21.4) (2023-10-25)
 
 
