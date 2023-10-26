@@ -427,14 +427,14 @@ class SocketServer extends EventEmitter {
                 data = authorized.authorized
 
             if (data.log !== false && data.log !== 'false' && !data.method.startsWith('read.') && data.method !== 'updateUserStatus' && data.method !== 'userStatus' && data.method !== 'signIn' && data.method !== 'signUp') {
-                let object = { url: socket.socketUrl, data }
-                delete object.socket
-                this.emit('create.object', {
-                    method: 'create.object',
-                    array: 'message_log',
-                    object,
-                    organization_id: data.organization_id
-                });
+                // let object = { url: socket.socketUrl, data }
+                // delete object.socket
+                // this.emit('create.object', {
+                //     method: 'create.object',
+                //     array: 'message_log',
+                //     object,
+                //     organization_id: data.organization_id
+                // });
             }
 
             let sockets = this.get(data);
