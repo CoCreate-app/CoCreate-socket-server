@@ -348,7 +348,11 @@ class SocketServer extends EventEmitter {
 
                     const authorized = await this.authorize.check(data, socket.user_id)
                     let errors = {}
-                    if (authorized.serverOrganization === false) {
+                    if (authorized === false) {
+                        delete data.socket
+                        data.error = 'authorization failed'
+                        return socket.send(JSON.stringify(data))
+                    } else if (authorized.serverOrganization === false) {
                         organization.status = errors.status = false;
                         organization.serverOrganization = false;
                         organization.error = authorized.error
