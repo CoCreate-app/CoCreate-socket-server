@@ -64,7 +64,7 @@ class SocketServer extends EventEmitter {
                     if (!organization || organization && organization.status !== false) {
                         let data = {
                             socket,
-                            method: 'read.object',
+                            method: 'object.read',
                             array: 'message_log',
                             $filter: {
                                 sort: [
@@ -142,8 +142,8 @@ class SocketServer extends EventEmitter {
 
             this.organizations.set(organization_id, organization)
 
-            this.emit('update.object', {
-                method: 'update.object',
+            this.emit('object.update', {
+                method: 'object.update',
                 array: 'organizations',
                 object: {
                     _id: organization_id, ['$push.activeHost']: socket.socketUrl // needs socketId
@@ -234,8 +234,8 @@ class SocketServer extends EventEmitter {
 
                 if (!Object.keys(clients).length) {
                     this.organizations.delete(socket.organization_id);
-                    this.emit('update.object', {
-                        method: 'update.object',
+                    this.emit('object.update', {
+                        method: 'object.update',
                         array: 'organizations',
                         object: {
                             _id: organization_id, ['$pull.activeHost']: socket.socketUrl
@@ -430,12 +430,12 @@ class SocketServer extends EventEmitter {
             if (authorized && authorized.authorized)
                 data = authorized.authorized
 
-            if (data.log !== false && data.log !== 'false' && !data.method.startsWith('read.') && data.method !== 'updateUserStatus' && data.method !== 'userStatus' && data.method !== 'signIn' && data.method !== 'signUp') {
+            if (data.log !== false && data.log !== 'false' && !data.method.endsWith('.read') && data.method !== 'updateUserStatus' && data.method !== 'userStatus' && data.method !== 'signIn' && data.method !== 'signUp') {
                 // TODO: store logged messages more efficently by combing objects wherever possible
                 // let object = { url: socket.socketUrl, data }
                 // delete object.socket
-                // this.emit('create.object', {
-                //     method: 'create.object',
+                // this.emit('object.create', {
+                //     method: 'object.create',
                 //     array: 'message_log',
                 //     object,
                 //     organization_id: data.organization_id

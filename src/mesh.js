@@ -16,7 +16,7 @@ async function addServer(data) {
 
     // TODO: needs to get orgaizations activeRegions
     let activeRegions = await crud.send({
-        method: 'read.object',
+        method: 'object.read',
         array: 'organizations',
         object: { _id: data.organization_id },
         organization_id: data.organization_id
