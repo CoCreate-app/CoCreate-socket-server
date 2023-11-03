@@ -146,7 +146,7 @@ class SocketServer extends EventEmitter {
                 method: 'object.update',
                 array: 'organizations',
                 object: {
-                    _id: organization_id, ['$push.activeHost']: socket.socketUrl // needs socketId
+                    _id: organization_id, ['$addToSet.activeHost']: socket.socketUrl // needs socketId
                 },
                 organization_id
             });
