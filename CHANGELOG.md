@@ -1,3 +1,13 @@
+## [1.21.6](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.5...v1.21.6) (2023-11-03)
+
+
+### Bug Fixes
+
+*  authorized false condition ([056e59a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/056e59a41558f3a4a4450aa84ef8043ee1e5922b))
+* $addToSet.activeHost ([d705f16](https://github.com/CoCreate-app/CoCreate-socket-server/commit/d705f16ab7bef6bf6c0fe2f5f4d9416b1d9df463))
+* update dependencies to the lates versions ([6260248](https://github.com/CoCreate-app/CoCreate-socket-server/commit/62602485421b432ad00ca25712b3798c3a97eeef))
+* update method to use object.update etc ([10e4530](https://github.com/CoCreate-app/CoCreate-socket-server/commit/10e4530ea792e7e71bdf79a1c965e94bf2204edf))
+
 ## [1.21.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.4...v1.21.5) (2023-10-26)
 
 
