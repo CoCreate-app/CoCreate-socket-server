@@ -82,7 +82,7 @@ class SocketServer extends EventEmitter {
                         else
                             data.$filter.limit = 1
 
-                        self.emit('read.object', data);
+                        self.emit('object.read', data);
 
                         if (self.authenticate) {
                             const { user_id, expires } = self.authenticate.decodeToken(options.token)
