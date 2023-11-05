@@ -330,7 +330,7 @@ class SocketServer extends EventEmitter {
                 if (data.method === 'region.added' || data.method === 'region.removed')
                     console.log('data.method: ', data.method)
 
-                if (socket.user_id && socket.expires && new Date().getTime() >= socket.expires) {
+                if (socket.user_id && socket.expires && new Date(new Date().toISOString()).getTime() >= socket.expires) {
                     socket.user_id = socket.expires = null
                     this.send({ socket, method: 'updateUserStatus', userStatus: 'off', socketId: data.socketId, organization_id })
                 }
