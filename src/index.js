@@ -57,8 +57,10 @@ class SocketServer extends EventEmitter {
                     socket.socketUrl = socket.origin + socket.pathname
 
                     if (socket.origin && socket.origin !== 'null') {
-                        const url = new URL(socket.origin);
-                        socket.host = url.host || socket.origin;
+                        if (socket.origin.includes('://'))
+                            socket.host = new URL(socket.origin).host
+                        else
+                            socket.host = socket.origin;
                     }
 
                     if (!organization || organization && organization.status !== false) {
