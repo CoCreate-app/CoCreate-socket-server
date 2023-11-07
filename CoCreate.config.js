@@ -12,8 +12,7 @@ module.exports = {
                 "pathname": "/docs/socket-server/index.html",
                 "src": "{{./docs/index.html}}",
                 "host": [
-                    "*",
-                    "general.cocreate.app"
+                    "*"
                 ],
                 "directory": "socket-server",
                 "content-type": "text/html",
