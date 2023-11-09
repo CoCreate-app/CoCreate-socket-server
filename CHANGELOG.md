@@ -1,3 +1,13 @@
+## [1.21.7](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.6...v1.21.7) (2023-11-09)
+
+
+### Bug Fixes
+
+* meta name typo ([37b85be](https://github.com/CoCreate-app/CoCreate-socket-server/commit/37b85bee20c4ff7e73eccca039f9dbeb84c82417))
+* update crud methods ([2853e1f](https://github.com/CoCreate-app/CoCreate-socket-server/commit/2853e1f82c76998cdf2d5de3ee05128c454bd2e8))
+* update host ([4139426](https://github.com/CoCreate-app/CoCreate-socket-server/commit/41394268a2b0814d2373870184c7d30c60b94383))
+* updated date to ISO format with UTC timezone ([98b5e0a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/98b5e0abd9768e8297b54db9a4b86babf3fc69ca))
+
 ## [1.21.6](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.5...v1.21.6) (2023-11-03)
 
 
