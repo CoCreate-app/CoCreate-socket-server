@@ -416,14 +416,17 @@ class SocketServer extends EventEmitter {
                 return
 
             for (let i = 0; i < data.object.length; i++) {
-                data.object[i].data._id = data.object[i]._id
-                data.object[i].data.sync = true
+                if (data.object[i].data) {
+                    data.object[i].data._id = data.object[i]._id
+                    data.object[i].data.sync = true
 
-                const authorized = await this.authorize.check(data.object[i].data, socket.user_id)
-                if (authorized && authorized.authorized)
-                    socket.send(JSON.stringify(authorized.authorized));
-                else
-                    socket.send(JSON.stringify(data.object[i].data));
+                    const authorized = await this.authorize.check(data.object[i].data, socket.user_id)
+                    if (authorized && authorized.authorized)
+                        socket.send(JSON.stringify(authorized.authorized));
+                    else
+                        socket.send(JSON.stringify(data.object[i].data));
+                } else
+                    console.log('server sync missing data')
             }
         } else {
             const sent = []
