@@ -1,3 +1,10 @@
+## [1.21.9](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.8...v1.21.9) (2023-11-11)
+
+
+### Bug Fixes
+
+* sync console.log ([b49bb6a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/b49bb6a2ccf8cf3f166b9f7acd511a28109202eb))
+
 ## [1.21.8](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.7...v1.21.8) (2023-11-09)
 
 
