@@ -1,3 +1,17 @@
+## [1.21.10](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.9...v1.21.10) (2023-11-12)
+
+
+### Bug Fixes
+
+* bump dependencies for latest features ([1289fea](https://github.com/CoCreate-app/CoCreate-socket-server/commit/1289fead1840da1d092cb52d4b4bd71bb47c3d2b))
+
+## [1.21.9](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.8...v1.21.9) (2023-11-11)
+
+
+### Bug Fixes
+
+* sync console.log ([b49bb6a](https://github.com/CoCreate-app/CoCreate-socket-server/commit/b49bb6a2ccf8cf3f166b9f7acd511a28109202eb))
+
 ## [1.21.8](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.21.7...v1.21.8) (2023-11-09)
 
 
