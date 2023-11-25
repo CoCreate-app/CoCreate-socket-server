@@ -1,3 +1,15 @@
+# [1.24.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.23.0...v1.24.0) (2023-11-25)
+
+
+### Bug Fixes
+
+* update licensing details ([e105a05](https://github.com/CoCreate-app/CoCreate-socket-server/commit/e105a05f3d5c9a0f889a99f4cf8f086c46c93679))
+
+
+### Features
+
+* upgrade dependencies for latest features and fixes ([33f5073](https://github.com/CoCreate-app/CoCreate-socket-server/commit/33f50737ff478d1147ea183e2fa058d5dc8dca35))
+
 # [1.23.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.22.0...v1.23.0) (2023-11-25)
 
 
