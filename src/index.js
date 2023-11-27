@@ -30,7 +30,7 @@ class SocketServer extends EventEmitter {
             let organization_id = request.url.split('/')
             organization_id = organization_id[organization_id.length - 1]
 
-            this.wss.handleUpgrade(request, socket, head, function (socket) {
+            this.wss.handleUpgrade(request, socket, head, async function (socket) {
                 if (organization_id) {
                     let organization = self.organizations.get(organization_id)
                     if (organization && organization.status === false) {
@@ -87,7 +87,7 @@ class SocketServer extends EventEmitter {
                         self.emit('object.read', data);
 
                         if (self.authenticate) {
-                            const { user_id, expires } = self.authenticate.decodeToken(options.token)
+                            const { user_id, expires } = await self.authenticate.decodeToken(options.token, organization_id, options.clientId)
                             const userStatus = { socket, method: 'userStatus', user_id: options.user_id, clientId: options.clientId, userStatus: 'off', organization_id }
                             if (user_id) {
                                 options.user_id = user_id
