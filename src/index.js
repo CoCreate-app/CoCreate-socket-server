@@ -403,8 +403,11 @@ class SocketServer extends EventEmitter {
                     if (authorized.authorized)
                         data = authorized.authorized
 
-                    this.emit(data.method, data);
-
+                    let mod = data.method.split('.')[0]
+                    if (['storage', 'database', 'array', 'index', 'object'].includes(mod))
+                        this.emit(data.method, data);
+                    else
+                        this.emit(mod, data);
                 }
             }
         } catch (e) {
@@ -414,6 +417,7 @@ class SocketServer extends EventEmitter {
 
     async send(data) {
         // const socket = this.sockets.get(data.socketId)
+        delete data.wsManager
         const socket = data.socket
 
         if (data.sync) {
