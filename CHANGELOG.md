@@ -1,3 +1,10 @@
+## [1.24.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.24.0...v1.24.1) (2023-12-05)
+
+
+### Bug Fixes
+
+* async await upgrade to handle authenticate ([e6416f5](https://github.com/CoCreate-app/CoCreate-socket-server/commit/e6416f5725ece424b69a142b70de4a0ca6687869))
+
 # [1.24.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.23.0...v1.24.0) (2023-11-25)
 
 
