@@ -1,3 +1,10 @@
+## [1.24.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.24.1...v1.24.2) (2023-12-09)
+
+
+### Bug Fixes
+
+* emit first part of method which is module name ([d5d2f2d](https://github.com/CoCreate-app/CoCreate-socket-server/commit/d5d2f2d70f1effece7e77c95cb409b82609ee228))
+
 ## [1.24.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.24.0...v1.24.1) (2023-12-05)
 
 
