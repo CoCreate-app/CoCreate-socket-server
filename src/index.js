@@ -461,6 +461,9 @@ class SocketServer extends EventEmitter {
             delete data.socket
 
             for (let i = 0; i < sockets.length; i++) {
+                if (!sockets[i])
+                    continue
+
                 const authorized = await this.authorize.check(data, sockets[i].user_id)
                 if (authorized && authorized.authorized)
                     sockets[i].send(JSON.stringify(authorized.authorized));
