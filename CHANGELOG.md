@@ -1,3 +1,10 @@
+## [1.24.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.24.2...v1.24.3) (2023-12-18)
+
+
+### Bug Fixes
+
+* if no sockets[i] continue ([fcab2cc](https://github.com/CoCreate-app/CoCreate-socket-server/commit/fcab2ccbf5ea6199ac2e2ceb111aa1fa6f23cf28))
+
 ## [1.24.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.24.1...v1.24.2) (2023-12-09)
 
 
