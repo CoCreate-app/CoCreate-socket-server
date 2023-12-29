@@ -63,8 +63,9 @@ class SocketServer extends EventEmitter {
                             socket.host = socket.origin;
                     }
 
+                    if (!await self.acme.checkCertificate(socket.host, organization_id))
+                        return socket.send(JSON.stringify({ method: 'Access Denied', error: 'Host not whitelisted' }))
 
-                    // TODO: handle ssl validation here and creation here
                     if (!organization || organization && organization.status !== false) {
                         let data = {
                             socket,
