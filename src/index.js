@@ -63,6 +63,8 @@ class SocketServer extends EventEmitter {
                             socket.host = socket.origin;
                     }
 
+
+                    // TODO: handle ssl validation here and creation here
                     if (!organization || organization && organization.status !== false) {
                         let data = {
                             socket,
