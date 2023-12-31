@@ -25,94 +25,97 @@ class SocketServer extends EventEmitter {
             socket.destroy();
         });
 
-        server.on('upgrade', (request, socket, head) => {
-            const self = this;
-            let organization_id = request.url.split('/')
-            organization_id = organization_id[organization_id.length - 1]
+        server.https.on('upgrade', (request, socket, head) => this.upgrade(request, socket, head))
+        server.http.on('upgrade', (request, socket, head) => this.upgrade(request, socket, head))
+    }
 
-            this.wss.handleUpgrade(request, socket, head, async function (socket) {
-                if (organization_id) {
-                    let organization = self.organizations.get(organization_id)
-                    if (organization && organization.status === false) {
-                        let errors = {}
-                        errors.serverOrganization = organization.serverOrganization
-                        errors.serverStorage = organization.serverStorage
-                        errors.organizationBalance = organization.organizationBalance
-                        errors.error = organization.error
-                        return socket.send(JSON.stringify({ method: 'Access Denied', error: errors }))
+    upgrade(request, socket, head) {
+        const self = this;
+        let organization_id = request.url.split('/')
+        organization_id = organization_id[organization_id.length - 1]
+
+        this.wss.handleUpgrade(request, socket, head, async function (socket) {
+            if (organization_id) {
+                let organization = self.organizations.get(organization_id)
+                if (organization && organization.status === false) {
+                    let errors = {}
+                    errors.serverOrganization = organization.serverOrganization
+                    errors.serverStorage = organization.serverStorage
+                    errors.organizationBalance = organization.organizationBalance
+                    errors.error = organization.error
+                    return socket.send(JSON.stringify({ method: 'Access Denied', error: errors }))
+                }
+
+                let options = decodeURIComponent(request.headers['sec-websocket-protocol'])
+                options = JSON.parse(options)
+
+                socket.organization_id = organization_id
+                socket.id = options.socketId;
+                socket.clientId = options.clientId;
+                socket.pathname = request.url
+                socket.origin = request.headers.origin || request.headers.host
+
+                if (socket.origin.startsWith('http'))
+                    socket.origin = socket.origin.replace('http', 'ws')
+
+                socket.socketUrl = socket.origin + socket.pathname
+
+                if (socket.origin && socket.origin !== 'null') {
+                    if (socket.origin.includes('://'))
+                        socket.host = new URL(socket.origin).host
+                    else
+                        socket.host = socket.origin;
+                }
+
+                if (!await self.acme.checkCertificate(socket.host, organization_id))
+                    return socket.send(JSON.stringify({ method: 'Access Denied', error: 'Host not whitelisted' }))
+
+                if (!organization || organization && organization.status !== false) {
+                    let data = {
+                        socket,
+                        method: 'object.read',
+                        array: 'message_log',
+                        $filter: {
+                            sort: [
+                                { key: '_id', direction: 'desc' }
+                            ]
+                        },
+                        sync: true,
+                        organization_id
                     }
 
-                    let options = decodeURIComponent(request.headers['sec-websocket-protocol'])
-                    options = JSON.parse(options)
+                    if (options.lastSynced)
+                        data.$filter.query = [
+                            { key: '_id', value: options.lastSynced, operator: '$gt' }
+                        ]
+                    else
+                        data.$filter.limit = 1
 
-                    socket.organization_id = organization_id
-                    socket.id = options.socketId;
-                    socket.clientId = options.clientId;
-                    socket.pathname = request.url
-                    socket.origin = request.headers.origin || request.headers.host
+                    self.emit('object.read', data);
 
-                    if (socket.origin.startsWith('http'))
-                        socket.origin = socket.origin.replace('http', 'ws')
-
-                    socket.socketUrl = socket.origin + socket.pathname
-
-                    if (socket.origin && socket.origin !== 'null') {
-                        if (socket.origin.includes('://'))
-                            socket.host = new URL(socket.origin).host
-                        else
-                            socket.host = socket.origin;
-                    }
-
-                    if (!await self.acme.checkCertificate(socket.host, organization_id))
-                        return socket.send(JSON.stringify({ method: 'Access Denied', error: 'Host not whitelisted' }))
-
-                    if (!organization || organization && organization.status !== false) {
-                        let data = {
-                            socket,
-                            method: 'object.read',
-                            array: 'message_log',
-                            $filter: {
-                                sort: [
-                                    { key: '_id', direction: 'desc' }
-                                ]
-                            },
-                            sync: true,
-                            organization_id
+                    if (self.authenticate) {
+                        const { user_id, expires } = await self.authenticate.decodeToken(options.token, organization_id, options.clientId)
+                        const userStatus = { socket, method: 'userStatus', user_id: options.user_id, clientId: options.clientId, userStatus: 'off', organization_id }
+                        if (user_id) {
+                            options.user_id = user_id
+                            socket.user_id = user_id;
+                            socket.expires = expires;
+                            userStatus.userStatus = 'on'
+                            self.emit("notification.user", socket)
                         }
 
-                        if (options.lastSynced)
-                            data.$filter.query = [
-                                { key: '_id', value: options.lastSynced, operator: '$gt' }
-                            ]
-                        else
-                            data.$filter.limit = 1
+                        self.emit('userStatus', userStatus);
 
-                        self.emit('object.read', data);
+                        self.onWebSocket(socket);
 
-                        if (self.authenticate) {
-                            const { user_id, expires } = await self.authenticate.decodeToken(options.token, organization_id, options.clientId)
-                            const userStatus = { socket, method: 'userStatus', user_id: options.user_id, clientId: options.clientId, userStatus: 'off', organization_id }
-                            if (user_id) {
-                                options.user_id = user_id
-                                socket.user_id = user_id;
-                                socket.expires = expires;
-                                userStatus.userStatus = 'on'
-                                self.emit("notification.user", socket)
-                            }
-
-                            self.emit('userStatus', userStatus);
-
-                            self.onWebSocket(socket);
-
-                        } else
-                            self.onWebSocket(socket);
-                    }
-
-                } else {
-                    socket.send(JSON.stringify({ method: 'Access Denied', error: 'An organization_id is required' }))
+                    } else
+                        self.onWebSocket(socket);
                 }
-            })
-        });
+
+            } else {
+                socket.send(JSON.stringify({ method: 'Access Denied', error: 'An organization_id is required' }))
+            }
+        })
     }
 
     onWebSocket(socket) {
