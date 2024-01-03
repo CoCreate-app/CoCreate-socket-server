@@ -1,3 +1,15 @@
+# [1.26.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.25.0...v1.26.0) (2024-01-03)
+
+
+### Bug Fixes
+
+* comment checkCertificate ([f70e8de](https://github.com/CoCreate-app/CoCreate-socket-server/commit/f70e8def302498d1f93cc4badde012333bbe8ea0))
+
+
+### Features
+
+* Added '[@cocreate-server](https://github.com/cocreate-server)' handle http and https ([5f530b1](https://github.com/CoCreate-app/CoCreate-socket-server/commit/5f530b135cb25a3af51fe059af57a235d0c3d51c))
+
 # [1.25.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.24.3...v1.25.0) (2023-12-31)
 
 
