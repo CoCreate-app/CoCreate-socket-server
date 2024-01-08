@@ -1,3 +1,15 @@
+# [1.27.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.26.0...v1.27.0) (2024-01-08)
+
+
+### Bug Fixes
+
+* applied host to define environment/branch ([fad44e5](https://github.com/CoCreate-app/CoCreate-socket-server/commit/fad44e52babae6dd142c22e88214956e2d3dfd97))
+
+
+### Features
+
+* bumped CoCreate dependencies to their latest versions ([b043307](https://github.com/CoCreate-app/CoCreate-socket-server/commit/b043307cb515a75a6fafd261ddb6295ceaba0ba9))
+
 # [1.26.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.25.0...v1.26.0) (2024-01-03)
 
 
