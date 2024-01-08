@@ -152,6 +152,7 @@ class SocketServer extends EventEmitter {
 
             this.emit('object.update', {
                 method: 'object.update',
+                host: socket.host,
                 array: 'organizations',
                 object: {
                     _id: organization_id, ['$addToSet.activeHost']: socket.socketUrl // needs socketId
@@ -244,6 +245,7 @@ class SocketServer extends EventEmitter {
                     this.organizations.delete(socket.organization_id);
                     this.emit('object.update', {
                         method: 'object.update',
+                        host: socket.host,
                         array: 'organizations',
                         object: {
                             _id: organization_id, ['$pull.activeHost']: socket.socketUrl
@@ -358,6 +360,7 @@ class SocketServer extends EventEmitter {
                     }
 
                     data.socket = socket
+                    data.host = socket.host
 
                     const authorized = await this.authorize.check(data, socket.user_id)
                     let errors = {}
