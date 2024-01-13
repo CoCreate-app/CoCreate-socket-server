@@ -25,11 +25,11 @@ class SocketServer extends EventEmitter {
             socket.destroy();
         });
 
-        server.https.on('upgrade', (request, socket, head) => this.upgrade(request, socket, head))
-        server.http.on('upgrade', (request, socket, head) => this.upgrade(request, socket, head))
+        server.https.on('upgrade', (request, socket, head) => this.upgrade(request, socket, head, 'wss'))
+        server.http.on('upgrade', (request, socket, head) => this.upgrade(request, socket, head, 'ws'))
     }
 
-    upgrade(request, socket, head) {
+    upgrade(request, socket, head, protocol) {
         const self = this;
         let organization_id = request.url.split('/')
         organization_id = organization_id[organization_id.length - 1]
@@ -53,19 +53,18 @@ class SocketServer extends EventEmitter {
                 socket.id = options.socketId;
                 socket.clientId = options.clientId;
                 socket.pathname = request.url
-                socket.origin = request.headers.origin || request.headers.host
+                socket.origin = request.headers.origin
+                socket.host = request.headers.host
 
-                if (socket.origin.startsWith('http'))
-                    socket.origin = socket.origin.replace('http', 'ws')
-
-                socket.socketUrl = socket.origin + socket.pathname
-
-                if (socket.origin && socket.origin !== 'null') {
+                if (!socket.host && socket.origin && socket.origin !== 'null') {
                     if (socket.origin.includes('://'))
                         socket.host = new URL(socket.origin).host
                     else
                         socket.host = socket.origin;
                 }
+
+                socket.socketUrl = protocol + '://' + socket.host + socket.pathname
+
 
                 // if (!await server.acme.checkCertificate(socket.host, organization_id))
                 //     return socket.send(JSON.stringify({ method: 'Access Denied', error: 'Host not whitelisted' }))
@@ -85,9 +84,10 @@ class SocketServer extends EventEmitter {
                     }
 
                     if (options.lastSynced)
-                        data.$filter.query = [
-                            { key: '_id', value: options.lastSynced, operator: '$gt' }
-                        ]
+                        data.$filter.query = {
+                            _id: { $gt: options.lastSynced }
+                        }
+
                     else
                         data.$filter.limit = 1
 
