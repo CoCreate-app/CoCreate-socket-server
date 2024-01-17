@@ -1,3 +1,10 @@
+## [1.27.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.27.0...v1.27.1) (2024-01-17)
+
+
+### Bug Fixes
+
+* handling of host and origin. Updated to support new query system ([61a1c68](https://github.com/CoCreate-app/CoCreate-socket-server/commit/61a1c685a1d3466836b19867558842632c7994a4))
+
 # [1.27.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.26.0...v1.27.0) (2024-01-08)
 
 
