@@ -319,105 +319,116 @@ class SocketServer extends EventEmitter {
 
     async onMessage(socket, message) {
         try {
-            const organization_id = socket.organization_id
-
             this.emit("setBandwidth", {
                 type: 'in',
                 data: message,
-                organization_id
+                organization_id: socket.organization_id
             });
 
 
             let data = JSON.parse(message)
-            if (data.method) {
-                const organization = this.organizations.get(organization_id)
-                if (organization && organization.organizationBalance == false) {
-                    data.organizationBalance = false
+            if (data.method)
+                this.Message(socket, data)
+            else {
+                data.error = 'method is required'
+                return socket.send(JSON.stringify(data))
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    async Message(socket, data) {
+        try {
+            const organization_id = socket.organization_id
+
+            const organization = this.organizations.get(organization_id)
+            if (organization && organization.organizationBalance == false) {
+                data.organizationBalance = false
+                data.error = organization.error
+                return socket.send(JSON.stringify(data))
+            }
+
+            if (data.method === 'region.added' || data.method === 'region.removed')
+                console.log('data.method: ', data.method)
+
+            if (socket.user_id && socket.expires && new Date(new Date().toISOString()).getTime() >= socket.expires) {
+                // data.error = 'Token expired'
+                // socket.send(JSON.stringify(data))
+                await this.send({
+                    socket, method: 'updateUserStatus', user_id: socket.user_id, clientId: data.clientId, userStatus: 'off', socketId: data.socketId, organization_id
+                })
+                socket.user_id = socket.expires = null
+                return
+            }
+
+            if (this.authorize) {
+                if (!this.sockets.has(socket.id)) {
+                    if (organization && organization.organizationBalance == false) {
+                        data.organizationBalance = false
+                        data.error = organization.error
+                        return socket.send(JSON.stringify(data))
+                    }
+                }
+
+                data.socket = socket
+                data.host = socket.host
+
+                const authorized = await this.authorize.check(data, socket.user_id)
+                let errors = {}
+                if (authorized === false) {
+                    delete data.socket
+                    data.error = 'authorization failed'
+                    return socket.send(JSON.stringify(data))
+                } else if (authorized.serverOrganization === false) {
+                    organization.status = errors.status = false;
+                    organization.serverOrganization = false;
+                    organization.error = authorized.error
+                } else if (authorized.serverStorage === false) {
+                    data.database = process.env.organization_id
+                    data.organization_id = process.env.organization_id
+
+                    const authorized2 = await this.authorize.check(data, req, socket.user_id)
+                    if (!authorized2 || authorized2.error) {
+                        organization.status = errors.status = false;
+                        organization.error = errors.error = authorized.error
+                        if (authorized2.serverOrganization === false) {
+                            organization.serverOrganization = false;
+                        }
+                        if (authorized2.serverStorage === false) {
+                            organization.serverStorage = false;
+                        }
+                    }
+                } else if (authorized.error) {
+                    organization.status = false;
+                    organization.error = authorized.error
+                }
+
+                if (organization && organization.status === false) {
+                    let errors = {}
+                    data.serverOrganization = organization.serverOrganization
+                    data.serverStorage = organization.serverStorage
+                    data.organizationBalance = organization.organizationBalance
                     data.error = organization.error
+                    delete data.socket
                     return socket.send(JSON.stringify(data))
                 }
 
-                if (data.method === 'region.added' || data.method === 'region.removed')
-                    console.log('data.method: ', data.method)
-
-                if (socket.user_id && socket.expires && new Date(new Date().toISOString()).getTime() >= socket.expires) {
-                    // data.error = 'Token expired'
-                    // socket.send(JSON.stringify(data))
-                    await this.send({
-                        socket, method: 'updateUserStatus', user_id: socket.user_id, clientId: data.clientId, userStatus: 'off', socketId: data.socketId, organization_id
-                    })
-                    socket.user_id = socket.expires = null
-                    return
-                }
-
-                if (this.authorize) {
-                    if (!this.sockets.has(socket.id)) {
-                        if (organization && organization.organizationBalance == false) {
-                            data.organizationBalance = false
-                            data.error = organization.error
-                            return socket.send(JSON.stringify(data))
-                        }
-                    }
-
-                    data.socket = socket
-                    data.host = socket.host
-
-                    const authorized = await this.authorize.check(data, socket.user_id)
-                    let errors = {}
-                    if (authorized === false) {
-                        delete data.socket
-                        data.error = 'authorization failed'
-                        return socket.send(JSON.stringify(data))
-                    } else if (authorized.serverOrganization === false) {
-                        organization.status = errors.status = false;
-                        organization.serverOrganization = false;
-                        organization.error = authorized.error
-                    } else if (authorized.serverStorage === false) {
-                        data.database = process.env.organization_id
-                        data.organization_id = process.env.organization_id
-
-                        const authorized2 = await this.authorize.check(data, req, socket.user_id)
-                        if (!authorized2 || authorized2.error) {
-                            organization.status = errors.status = false;
-                            organization.error = errors.error = authorized.error
-                            if (authorized2.serverOrganization === false) {
-                                organization.serverOrganization = false;
-                            }
-                            if (authorized2.serverStorage === false) {
-                                organization.serverStorage = false;
-                            }
-                        }
-                    } else if (authorized.error) {
-                        organization.status = false;
-                        organization.error = authorized.error
-                    }
-
-                    if (organization && organization.status === false) {
-                        let errors = {}
-                        data.serverOrganization = organization.serverOrganization
-                        data.serverStorage = organization.serverStorage
-                        data.organizationBalance = organization.organizationBalance
-                        data.error = organization.error
-                        delete data.socket
-                        return socket.send(JSON.stringify(data))
-                    }
-
-                    // dburl is true and db does not have 'keys' array
-                    // action: syncCollection data{array: 'keys', object[]}
-                    // actions: add keys as once keys are added admin user can do anything
+                // dburl is true and db does not have 'keys' array
+                // action: syncCollection data{array: 'keys', object[]}
+                // actions: add keys as once keys are added admin user can do anything
 
 
-                    // }
+                // }
 
-                    if (authorized.authorized)
-                        data = authorized.authorized
+                if (authorized.authorized)
+                    data = authorized.authorized
 
-                    let mod = data.method.split('.')[0]
-                    if (['storage', 'database', 'array', 'index', 'object'].includes(mod))
-                        this.emit(data.method, data);
-                    else
-                        this.emit(mod, data);
-                }
+                let moduleName = data.method.split('.')[0]
+                if (['storage', 'database', 'array', 'index', 'object'].includes(moduleName))
+                    this.emit(data.method, data);
+                else
+                    this.emit(moduleName, data);
             }
         } catch (e) {
             console.log(e);
