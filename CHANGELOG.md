@@ -1,3 +1,10 @@
+# [1.28.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.27.1...v1.28.0) (2024-01-30)
+
+
+### Features
+
+* seperate onMessage from Message in order to to support internal message ([231f2cc](https://github.com/CoCreate-app/CoCreate-socket-server/commit/231f2cc796a4ddc35aa93960e3e0cae87527853e))
+
 ## [1.27.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.27.0...v1.27.1) (2024-01-17)
 
 
