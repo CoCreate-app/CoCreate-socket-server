@@ -1,3 +1,10 @@
+## [1.28.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.28.0...v1.28.1) (2024-02-05)
+
+
+### Bug Fixes
+
+* Removed https://cdn.cocreate.app/latest/CoCreate.min.css ([f16de7e](https://github.com/CoCreate-app/CoCreate-socket-server/commit/f16de7e2b2f5d985b754eb19a36426ea5e49632e))
+
 # [1.28.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.27.1...v1.28.0) (2024-01-30)
 
 
