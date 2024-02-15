@@ -1,3 +1,10 @@
+## [1.28.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.28.1...v1.28.2) (2024-02-15)
+
+
+### Bug Fixes
+
+* data.socket removal before sending ([ed9b6a1](https://github.com/CoCreate-app/CoCreate-socket-server/commit/ed9b6a19e8da58a48f5eabd44b2419cc13f3c433))
+
 ## [1.28.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.28.0...v1.28.1) (2024-02-05)
 
 
