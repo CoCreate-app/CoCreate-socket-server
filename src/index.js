@@ -460,6 +460,7 @@ class SocketServer extends EventEmitter {
         } else {
             const sent = []
 
+            //TODO: get socket using clientId if socket has been deleted from data
             const authorized = await this.authorize.check(data, socket.user_id)
             if (authorized && authorized.authorized)
                 data = authorized.authorized
@@ -478,21 +479,27 @@ class SocketServer extends EventEmitter {
 
             let sockets = this.get(data);
 
-            delete data.socket
+            // delete data.socket
 
             for (let i = 0; i < sockets.length; i++) {
                 if (!sockets[i])
                     continue
 
                 const authorized = await this.authorize.check(data, sockets[i].user_id)
-                if (authorized && authorized.authorized)
-                    sockets[i].send(JSON.stringify(authorized.authorized));
-                else
-                    sockets[i].send(JSON.stringify(data));
+                let Data
+                if (authorized && authorized.authorized) {
+                    Data = { ...authorized.authorized }
+                } else {
+                    Data = { ...data }
+                }
+
+                delete Data.socket
+                sockets[i].send(JSON.stringify(Data));
+
                 sent.push(socket.clientId)
                 this.emit("setBandwidth", {
                     type: 'out',
-                    data: authorized.authorized || data,
+                    data: Data,
                     organization_id: socket.organization_id
                 })
             }
