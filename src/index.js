@@ -73,6 +73,7 @@ class SocketServer extends EventEmitter {
                     let data = {
                         socket,
                         method: 'object.read',
+                        host: socket.host,
                         array: 'message_log',
                         $filter: {
                             sort: [
@@ -95,7 +96,7 @@ class SocketServer extends EventEmitter {
 
                     if (self.authenticate) {
                         const { user_id, expires } = await self.authenticate.decodeToken(options.token, organization_id, options.clientId)
-                        const userStatus = { socket, method: 'userStatus', user_id: options.user_id, clientId: options.clientId, userStatus: 'off', organization_id }
+                        const userStatus = { socket, method: 'userStatus', host: socket.host, user_id: options.user_id, clientId: options.clientId, userStatus: 'off', organization_id }
                         if (user_id) {
                             options.user_id = user_id
                             socket.user_id = user_id;
@@ -188,7 +189,7 @@ class SocketServer extends EventEmitter {
         }
 
         if (socket.user_id) {
-            this.emit('userStatus', { socket, user_id: socket.user_id, clientId: socket.clientId, userStatus: 'on', organization_id });
+            this.emit('userStatus', { socket, host: socket.host, user_id: socket.user_id, clientId: socket.clientId, userStatus: 'on', organization_id });
             let user = this.users.get(socket.user_id)
 
             if (!Array.isArray(user)) {
@@ -306,7 +307,7 @@ class SocketServer extends EventEmitter {
                         clearTimeout(userDebounceTimer);
                         userDebounceTimer = setTimeout(() => {
                             this.users.delete(socket.user_id);
-                            this.emit('userStatus', { socket, user_id: socket.user_id, clientId: socket.clientId, userStatus: 'off', organization_id });
+                            this.emit('userStatus', { socket, user_id: socket.user_id, host: socket.host, clientId: socket.clientId, userStatus: 'off', organization_id });
                         }, 10000);
 
                         this.users.set(socket.user_id, userDebounceTimer)
@@ -356,7 +357,7 @@ class SocketServer extends EventEmitter {
                 // data.error = 'Token expired'
                 // socket.send(JSON.stringify(data))
                 await this.send({
-                    socket, method: 'updateUserStatus', user_id: socket.user_id, clientId: data.clientId, userStatus: 'off', socketId: data.socketId, organization_id
+                    socket, method: 'updateUserStatus', user_id: socket.user_id, host: socket.host, clientId: data.clientId, userStatus: 'off', socketId: data.socketId, organization_id
                 })
                 socket.user_id = socket.expires = null
                 return
