@@ -494,6 +494,11 @@ class SocketServer extends EventEmitter {
                     Data = { ...data }
                 }
 
+                // TODO: the following code can cause issues in client and improved approach is to check if user has permission and send or dont send
+                // if (Data.$filter && Data.$filter.query && Data.$filter.query._id && Data.$filter.query._id.$eq === '$user_id')
+                //     delete Data.$filter.query._id
+
+
                 delete Data.socket
                 sockets[i].send(JSON.stringify(Data));
 
