@@ -1,3 +1,10 @@
+## [1.28.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.28.2...v1.28.3) (2024-02-18)
+
+
+### Bug Fixes
+
+* add host ([7542ee7](https://github.com/CoCreate-app/CoCreate-socket-server/commit/7542ee7cb28821515078a912e40574aa0c761b00))
+
 ## [1.28.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.28.1...v1.28.2) (2024-02-15)
 
 
