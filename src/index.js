@@ -171,53 +171,63 @@ class SocketServer extends EventEmitter {
 
 
         if (!this.clients.has(socket.clientId)) {
-            this.clients.set(socket.clientId, []);
+            this.clients.set(socket.clientId, {});
 
             if (!organization.clients)
-                organization.clients = { [socket.clientId]: [] }
+                organization.clients = { [socket.clientId]: {} }
             else
-                organization.clients[socket.clientId] = []
+                organization.clients[socket.clientId] = {}
         }
 
-        if (!this.sockets.has(socket.id)) {
-            this.sockets.set(socket.id, socket);
-            this.clients.get(socket.clientId).push(socket);
-            if (!organization.clients[socket.clientId])
-                organization.clients[socket.clientId] = [socket]
-            else
-                organization.clients[socket.clientId].push(socket)
-        }
+
+        this.sockets.set(socket.id, socket);
+        this.clients.get(socket.clientId)[socket.id] = socket
+        if (!organization.clients[socket.clientId])
+            organization.clients[socket.clientId] = { [socket.id]: socket }
+        else
+            organization.clients[socket.clientId][socket.id] = socket
 
         if (socket.user_id) {
             this.emit('userStatus', { socket, host: socket.host, user_id: socket.user_id, clientId: socket.clientId, userStatus: 'on', organization_id });
             let user = this.users.get(socket.user_id)
 
-            if (!Array.isArray(user)) {
+            if (!user) {
                 clearTimeout(user)
-                this.users.set(socket.user_id, [socket])
+                this.users.set(socket.user_id, { [socket.id]: socket })
             } else
-                user.push(socket)
+                user[socket.id] = socket
         }
 
     }
 
     get(data) {
-        let sockets = []
-        if (data.broadcast !== false) {
-            let organization = this.organizations.get(data.organization_id)
-            if (organization) {
-                const clients = organization.clients
-                for (let client of Object.keys(clients)) {
-                    if (data.broadcastSender === false && client === data.clientId) continue
+        let sockets = [], clients
+        let organization = this.organizations.get(data.organization_id)
+        if (organization)
+            clients = organization.clients
+        else
+            return []
 
-                    if (data.broadcastClient)
-                        sockets.push(clients[client][0])
+        if (data.broadcast !== false) {
+            for (let client of Object.keys(clients)) {
+                if (data.broadcastSender === false && client === data.clientId) continue
+
+                if (data.broadcastClient) {
+                    if (client === data.clientId && clients[client][data.socket.id])
+                        sockets.push(clients[client][data.socket.id])
                     else
-                        sockets.push(...clients[client])
-                }
+                        sockets.push(Object.values(clients[client])[0])
+                } else
+                    sockets.push(...Array.from(Object.values(clients[client])))
             }
         } else if (data.broadcastSender !== false) {
-            sockets.push(data.socket)
+            if (clients[data.clientId]) {
+                if (clients[data.clientId][data.socket.id])
+                    sockets.push(clients[data.clientId][data.socket.id])
+                else
+                    sockets.push(Object.values(clients[data.clientId])[0])
+            } else
+                sockets.push(data.socket)
         }
         return sockets
     }
@@ -231,16 +241,20 @@ class SocketServer extends EventEmitter {
             // Check if the client exists
             if (clients && clients[socket.clientId]) {
                 const client = clients[socket.clientId]
+                delete client[socket.id]
+
+                if (!Object.keys(client).length)
+                    delete clients[socket.clientId];
 
                 // Check if the socket exists in the client's sockets
-                const index = client.findIndex(item => item.id === socket.id);
-                if (index !== -1) {
-                    client.splice(index, 1);
-                }
+                // const index = client.findIndex(item => item.id === socket.id);
+                // if (index !== -1) {
+                //     client.splice(index, 1);
+                // }
 
-                if (!client.length) {
-                    delete clients[socket.clientId];
-                }
+                // if (!client.length) {
+                //     delete clients[socket.clientId];
+                // }
 
                 if (!Object.keys(clients).length) {
                     this.organizations.delete(socket.organization_id);
@@ -265,14 +279,10 @@ class SocketServer extends EventEmitter {
 
         if (this.clients.has(socket.clientId)) {
             const client = this.clients.get(socket.clientId)
-            const index = client.findIndex(item => item.id === socket.id);
-            if (index !== -1) {
-                client.splice(index, 1);
-            }
+            delete client[socket.id]
 
-            if (!client.length) {
+            if (!Object.keys(client).length)
                 this.clients.delete(socket.clientId);
-            }
         }
 
         if (this.clients.size === 0) {
@@ -296,12 +306,8 @@ class SocketServer extends EventEmitter {
             if (socket.user_id) {
                 let sockets = this.users.get(socket.user_id)
                 if (sockets) {
-                    if (Array.isArray(sockets) && sockets.length) {
-                        const index = sockets.findIndex(item => item.id === socket.id);
-                        if (index !== -1) {
-                            sockets.splice(index, 1);
-                        }
-                    } else {
+                    delete sockets[socket.id]
+                    if (!Object.keys(sockets).length) {
                         let userDebounceTimer = sockets
 
                         clearTimeout(userDebounceTimer);
@@ -495,8 +501,8 @@ class SocketServer extends EventEmitter {
                 }
 
                 // TODO: the following code can cause issues in client and improved approach is to check if user has permission and send or dont send
-                // if (Data.$filter && Data.$filter.query && Data.$filter.query._id && Data.$filter.query._id.$eq === '$user_id')
-                //     delete Data.$filter.query._id
+                if (Data.$filter && Data.$filter.query && Data.$filter.query._id && Data.$filter.query._id.$eq === '$user_id')
+                    delete Data.$filter.query._id
 
 
                 delete Data.socket
