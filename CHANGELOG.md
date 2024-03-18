@@ -1,3 +1,10 @@
+# [1.29.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.28.3...v1.29.0) (2024-03-18)
+
+
+### Features
+
+* get socket using socket.id to maintain a persitient socket connection wtih client tabs ([922a462](https://github.com/CoCreate-app/CoCreate-socket-server/commit/922a4629573751ca87e72fde46598bc340af419f))
+
 ## [1.28.3](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.28.2...v1.28.3) (2024-02-18)
 
 
