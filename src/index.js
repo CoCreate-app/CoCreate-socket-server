@@ -192,10 +192,11 @@ class SocketServer extends EventEmitter {
             let user = this.users.get(socket.user_id)
 
             if (!user) {
-                clearTimeout(user)
                 this.users.set(socket.user_id, { [socket.id]: socket })
-            } else
+            } else {
+                clearTimeout(user)
                 user[socket.id] = socket
+            }
         }
 
     }
