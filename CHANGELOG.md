@@ -1,3 +1,10 @@
+## [1.29.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.29.0...v1.29.1) (2024-04-26)
+
+
+### Bug Fixes
+
+* clearTimout if userid seesion is reconnected ([4895fff](https://github.com/CoCreate-app/CoCreate-socket-server/commit/4895fff37e85eb2cdd3bb985804e8c362268360e))
+
 # [1.29.0](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.28.3...v1.29.0) (2024-03-18)
 
 
