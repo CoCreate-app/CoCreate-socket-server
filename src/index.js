@@ -432,9 +432,12 @@ class SocketServer extends EventEmitter {
                 if (authorized.authorized)
                     data = authorized.authorized
 
+                // TODO: handle non module cases where send is required from messages
                 let moduleName = data.method.split('.')[0]
                 if (['storage', 'database', 'array', 'index', 'object'].includes(moduleName))
                     this.emit(data.method, data);
+                else if (data.method === 'crdt' || data.method === 'cursor')
+                    this.send(data);
                 else
                     this.emit(moduleName, data);
             }
