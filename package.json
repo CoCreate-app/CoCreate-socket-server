@@ -43,6 +43,6 @@
     "@cocreate/config": "^1.10.0",
     "@cocreate/uuid": "^1.10.0",
     "@cocreate/utils": "^1.30.0",
-    "ws": "7.5.9"
+    "ws": "7.5.10"
   }
 }
