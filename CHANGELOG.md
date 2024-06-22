@@ -1,3 +1,10 @@
+## [1.29.2](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.29.1...v1.29.2) (2024-06-22)
+
+
+### Bug Fixes
+
+* temporarily handle sending messages that dont have modules ([f1f6407](https://github.com/CoCreate-app/CoCreate-socket-server/commit/f1f6407817b95040accebd9fc4523a1817928ff2))
+
 ## [1.29.1](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.29.0...v1.29.1) (2024-04-26)
 
 
