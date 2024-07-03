@@ -1,3 +1,10 @@
+## [1.29.5](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.29.4...v1.29.5) (2024-07-03)
+
+
+### Bug Fixes
+
+* handling of message_log ([121ab98](https://github.com/CoCreate-app/CoCreate-socket-server/commit/121ab98afdd8e8c700730d44e101c530bc47fdcd))
+
 ## [1.29.4](https://github.com/CoCreate-app/CoCreate-socket-server/compare/v1.29.3...v1.29.4) (2024-06-23)
 
 
