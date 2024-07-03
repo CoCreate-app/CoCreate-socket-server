@@ -88,7 +88,6 @@ class SocketServer extends EventEmitter {
                         data.$filter.query = {
                             _id: { $gt: options.lastSynced }
                         }
-
                     else
                         data.$filter.limit = 1
 
@@ -478,14 +477,20 @@ class SocketServer extends EventEmitter {
 
             if (data.log !== false && data.log !== 'false' && !data.method.endsWith('.read') && data.method !== 'updateUserStatus' && data.method !== 'userStatus' && data.method !== 'signIn' && data.method !== 'signUp') {
                 // TODO: store logged messages more efficently by combing objects wherever possible
-                // let object = { url: socket.socketUrl, data }
-                // delete object.socket
-                // this.emit('object.create', {
-                //     method: 'object.create',
-                //     array: 'message_log',
-                //     object,
-                //     organization_id: data.organization_id
-                // });
+                let moduleName = data.method.split('.')
+                if (['storage', 'database', 'array', 'index', 'object'].includes(moduleName[0]) && ['delete'].includes(moduleName[1])) {
+                    let object = { url: socket.socketUrl, data: { ...data } }
+                    delete object.data.socket
+
+                    // object.data.socket = { id: object.data.socket.id }
+                    this.emit('object.create', {
+                        method: 'object.create',
+                        host: data.host,
+                        array: 'message_log',
+                        object,
+                        organization_id: data.organization_id
+                    });
+                }
             }
 
             let sockets = this.get(data);
@@ -507,7 +512,6 @@ class SocketServer extends EventEmitter {
                 // TODO: the following code can cause issues in client and improved approach is to check if user has permission and send or dont send
                 if (Data.$filter && Data.$filter.query && Data.$filter.query._id && Data.$filter.query._id.$eq === '$user_id')
                     delete Data.$filter.query._id
-
 
                 delete Data.socket
                 sockets[i].send(JSON.stringify(Data));
